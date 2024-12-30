@@ -1,16 +1,22 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+<div class="relative flex flex-col sm:flex-row">
+     <div class="sm:w-[250px] sm:h-screen sm:sticky sm:top-0">
+         <NavMenu />
+     </div>
+      
+    <main class="flex-1">
+        <nav class="sticky top-0 hidden h-[4.5rem] w-full items-center justify-between bg-white px-9 sm:flex">
+                <div class="relative flex flex-col">
+                    <p class="text-2xl font-bold">Good Morning Nilak</p>
+                    <p class="absolute bottom-0 text-sm text-gray-400">You've spent Rs 3000 this month</p>
+                </div>
+                <div>
+                    <Button  Color="Color.Green8" Type="primary">Log out</Button>
+                </div>
+            </nav>
+        <article class="content min-h-screen bg-slate-100 px-4">
+           
             @Body
         </article>
     </main>

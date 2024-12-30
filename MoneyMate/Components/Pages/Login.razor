@@ -1,0 +1,20 @@
+﻿@* @page "/login"
+
+<div class="login-container">
+    <h3>Login</h3>
+    <Input Placeholder="Username" @bind-Value="Username" />
+    <Input Placeholder="Password" @bind-Value="Password" Type="password" />
+    <Button Type="primary" OnClick="HandleLogin">Login</Button>
+</div>
+
+@code {
+    private string Username { get; set; }
+    private string Password { get; set; }
+
+    private void HandleLogin()
+    {
+        // Add authentication logic here
+        Console.WriteLine($"Login attempt: {Username}");
+    }
+}
+ *@

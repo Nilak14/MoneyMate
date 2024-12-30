@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-
+using AntDesign;
 namespace MoneyMate
 {
     public static class MauiProgram
@@ -15,9 +15,11 @@ namespace MoneyMate
                 });
 
             builder.Services.AddMauiBlazorWebView();
+            builder.Services.AddAntDesign();
+           
 
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
 

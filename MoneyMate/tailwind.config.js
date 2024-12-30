@@ -2,9 +2,11 @@
 module.exports = {
     content: ["./**/*.{html,cshtml,razor,js}"],
   darMode:"class",
-  theme: {
-    extend: {},
-  },
+    theme: {
+        extend: {
+            
+        },
+    },
   plugins: [],
 }
 

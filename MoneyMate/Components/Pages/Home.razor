@@ -1,8 +1,150 @@
 ﻿@page "/"
 
-Welcome to your new app.
+@using AntDesign.Charts
+@using Title = AntDesign.Charts.Title
 
-<h1 class="border-2 border-red-500 text-2xl text-red-500" > Hello, from tailwind</h1>
-<Button Type="Primary">Override Example</Button>
+<div class="max-w-screen mx-auto flex flex-wrap justify-between gap-5">
+    <div class="border-2 min-w-[45%] max-w-[50%] rounded-md border-black bg-white p-4">
+        <h1 class="text-center text-xl font-bold">This Week</h1>
+         <Tabs>
+             <TabPane Tab="Income">
+                 <AntDesign.Charts.Column Data="income" Config="incomeConfig" />
+               
+             </TabPane>
+             <TabPane Tab="Expenditure">
+                 <AntDesign.Charts.Column Data="expenditure" Config="expenditureConfig" />
+              
+             </TabPane>
+
+         </Tabs>
+    </div>
+    <div class="border-2 flex min-w-[45%] max-w-[50%] flex-col items-center justify-center rounded-md border-black bg-white p-4">
+        <h1 class="text-center text-xl font-bold">This Month</h1>
+       <Pie Data="pieData" Config="pieConfig" /> 
+    </div>
+   
+</div>
 
 
+
+@code {
+
+    
+
+    readonly object[] income =
+    {
+        new {day = "sun",
+            income = 20000,
+        }, new {day = "mon",
+            income = 10000,
+        }, new {day = "tue",
+            income = 200,
+        }, new {day = "wed",
+            income = 12000,
+        }, new {day = "thu",
+            income = 18000,
+        }, new {day = "fri",
+            income = 20000,
+        }, new {day = "sat",
+            income = 20000,
+        },
+       
+    };
+
+    readonly ColumnConfig incomeConfig = new ColumnConfig
+        {
+            Title = new Title
+            {
+                Visible = true,
+                Text = "Nilak"
+            },
+            ForceFit = true,
+            XField = "day",
+            YField = "income",
+            AutoFit = true,
+            YAxis = new ValueAxis
+            {
+                Min = 0
+            },
+            Color = new[] { "#ae331b", "#1a6179" },
+            SeriesField = "type"
+        };
+
+    
+
+
+
+
+    readonly object[] expenditure =
+    {
+        new {day = "sun",
+            expenditure = 20000,
+        }, new {day = "mon",
+            expenditure = 10000,
+        }, new {day = "tue",
+            expenditure = 200,
+        }, new {day = "wed",
+            expenditure = 12000,
+        }, new {day = "thu",
+            expenditure = 18000,
+        }, new {day = "fri",
+            expenditure = 20000,
+        }, new {day = "sat",
+            expenditure = 20000,
+        },
+       
+    };
+    readonly ColumnConfig expenditureConfig = new ColumnConfig
+        {
+            Title = new Title
+            {
+                Visible = true,
+                Text = "Nilak"
+            },
+            ForceFit = true,
+            AutoFit = true,
+            XField = "day",
+            YField = "expenditure",
+            YAxis = new ValueAxis
+            {
+                Min = 0
+            },
+            Color = new[] { "#00FF00", "#00FF00" },
+            SeriesField = "type"
+        };
+
+   
+    readonly object[] pieData =
+       {
+        new
+        {
+            type = "Income",
+            value = 40000
+        },
+        new
+        {
+            type = "Expenditure",
+            value = 25000
+        },
+        new
+        {
+            type = "Debt",
+            value = 18000
+        },
+       
+    };
+
+    readonly PieConfig pieConfig = new PieConfig
+        {
+           
+            
+            AppendPadding = 10,
+            InnerRadius = 0.6,
+            Radius = 0.8,
+            Padding = "auto",
+            AngleField = "value",
+            ColorField = "type",
+            AutoFit = true,
+
+        };
+}

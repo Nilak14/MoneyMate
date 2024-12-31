@@ -1,30 +1,44 @@
-﻿<div class="top-row navbar navbar-dark ps-3">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">MoneyMate</a>
-    </div>
+﻿
+
+<div class="flex items-center justify-start px-5 py-3 sm:justify-center sm:px-0"> 
+       <MoneyMate.Components.ui.Logo />
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<input type="checkbox" title="Navigation menu" class="navbar-toggler bg-black" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
+
+    <aside class="mt-0 sm:mt-10">
+        @foreach (var route in routes)
+           
+        {
+            <div class="flex items-center px-6 py-2 text-base">
+                <NavLink class="flex h-full w-full items-center gap-4 rounded-md px-4 py-2 text-black hover:text-white hover:bg-green-700" href="@route.Href" Match="NavLinkMatch.All">
+                    
+                    <Icon  Height="2em" Width="2em" Type="@route.Icon" Theme="outline" />
+                   
+                    <span>@route.Name</span>
+
+                </NavLink>
+
+            </div>
+        }
+    </aside>
 </div>
 
+@code {
+  
+    private readonly List<Route> routes = new()
+    {
+        new Route { Name = "Dahsboard", Href = "", Icon = "appstore" },
+        new Route { Name = "Transections", Href = "counter", Icon = "transaction" },
+        new Route { Name = "Debt", Href = "weather", Icon = "account-book" }
+    };
 
-
+    private record Route
+    {
+        public string Name { get; init; }
+        public string Href { get; init; }
+        public string Icon { get; init; }
+    }
+}

@@ -1,4 +1,18 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+.active{
+    @apply bg-green-700 text-white}
+
+.ant-tabs-tab-btn[aria-selected="true"] {
+    @apply font-bold text-green-700;
+}
+.ant-tabs-tab-btn{
+    @apply font-bold text-black}
+
+.ant-tabs-ink-bar {
+    @apply !bg-green-700}
+
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+    @apply !text-green-700}

@@ -1,0 +1,12 @@
+﻿<Card Class="!rounded-lg !shadow-lg">
+   <h2 class="text-xl font-bold md:text-2xl">@title</h2>
+    <p class="text-base font-semibold">@content</p>
+</Card>
+
+@code {
+    [Parameter]
+    public required string  title { get; set; }
+
+    [Parameter]
+    public required string content { get; set; }
+}

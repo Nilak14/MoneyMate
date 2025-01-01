@@ -1,29 +1,44 @@
 ﻿@page "/"
 
 @using AntDesign.Charts
+@using MoneyMate.Components.ui
 @using Title = AntDesign.Charts.Title
 
-<div class="max-w-screen mx-auto flex flex-wrap justify-between gap-5">
-    <div class="border-2 min-w-[45%] max-w-[50%] rounded-md border-black bg-white p-4">
-        <h1 class="text-center text-xl font-bold">This Week</h1>
-         <Tabs>
-             <TabPane Tab="Income">
-                 <AntDesign.Charts.Column Data="income" Config="incomeConfig" />
-               
-             </TabPane>
-             <TabPane Tab="Expenditure">
-                 <AntDesign.Charts.Column Data="expenditure" Config="expenditureConfig" />
-              
-             </TabPane>
 
-         </Tabs>
-    </div>
-    <div class="border-2 flex min-w-[45%] max-w-[50%] flex-col items-center justify-center rounded-md border-black bg-white p-4">
-        <h1 class="text-center text-xl font-bold">This Month</h1>
-       <Pie Data="pieData" Config="pieConfig" /> 
-    </div>
-   
+<div class="mb-10 grid w-full gap-8 grid-cols-1  md:grid-cols-2 lg:grid-cols-3">
+    <DashboardCard title="$ 2000" content="Total Income" />
+    <DashboardCard title="$ 20000" content="Total Expenditure" />
+    <DashboardCard title="$ 200000" content="Total Debt" />
 </div>
+
+
+<div class="container mx-auto flex flex-wrap gap-5">
+    <!-- Weekly Chart Container -->
+    <div class="border-2 flex-1 min-w-full rounded-md border-black bg-white p-4 lg:min-w-[45%]">
+        <h1 class="text-center text-xl font-bold">This Week</h1>
+        <Tabs>
+            <TabPane Tab="Income">
+                <div class="w-full">
+                    <BarGraph Data="income" Config="incomeConfig" />
+                </div>
+            </TabPane>
+            <TabPane Tab="Expenditure">
+                <div class="w-full">
+                    <BarGraph Data="expenditure" Config="expenditureConfig" />
+                </div>
+            </TabPane>
+        </Tabs>
+    </div>
+
+    <!-- Monthly Chart Container -->
+    <div class="border-2 flex-1 min-w-full rounded-md border-black bg-white p-4 lg:min-w-[45%]">
+        <h1 class="text-center text-xl font-bold">This Month</h1>
+        <div class="w-full">
+            <PieChart Data="pieData" Config="pieConfig" />
+        </div>
+    </div>
+</div>
+
 
 
 
@@ -53,12 +68,8 @@
 
     readonly ColumnConfig incomeConfig = new ColumnConfig
         {
-            Title = new Title
-            {
-                Visible = true,
-                Text = "Nilak"
-            },
-            ForceFit = true,
+          
+          
             XField = "day",
             YField = "income",
             AutoFit = true,
@@ -96,12 +107,7 @@
     };
     readonly ColumnConfig expenditureConfig = new ColumnConfig
         {
-            Title = new Title
-            {
-                Visible = true,
-                Text = "Nilak"
-            },
-            ForceFit = true,
+          
             AutoFit = true,
             XField = "day",
             YField = "expenditure",

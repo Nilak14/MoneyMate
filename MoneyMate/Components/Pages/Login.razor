@@ -1,20 +1,75 @@
-﻿@* @page "/login"
+﻿@page "/login"
 
-<div class="login-container">
-    <h3>Login</h3>
-    <Input Placeholder="Username" @bind-Value="Username" />
-    <Input Placeholder="Password" @bind-Value="Password" Type="password" />
-    <Button Type="primary" OnClick="HandleLogin">Login</Button>
+<div class="flex min-h-screen items-center justify-center bg-gray-200">
+    <form @onsubmit="HandleLogin" class="w-96 rounded bg-white p-6 shadow">
+        <h1 class="mb-4 text-2xl font-bold">Login</h1>
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <p class="mb-4 text-sm text-red-500">@ErrorMessage</p>
+        }
+        <div class="mb-4">
+            <label class="mb-1 block text-sm font-medium text-gray-700">Username</label>
+            <Input required Type="text" Placeholder="Username" Size="InputSize.Large" @bind-Value="@Username">
+            <Prefix>
+                <Icon Type="@IconType.Outline.User" />
+            </Prefix>
+            </Input>
+        </div>
+        <div class="mb-6">
+            <label class="mb-1 block text-sm font-medium text-gray-700">Password</label>
+            <InputPassword required @bind-Value="@Password" Placeholder="Password" Size="InputSize.Large">
+                <Prefix>
+                    <Icon Type="@IconType.Outline.Lock" />
+                </Prefix>
+            </InputPassword>
+        </div>
+        <div class="mb-6">
+            <label class="mb-1 block text-sm font-medium text-gray-700">Currency Type</label>
+            <Select @bind-Value="@SelectedCurrency" OnChange="OnCurrencyChanged" TItem="string" TItemValue="string">
+                <SelectOptions>
+                    <SelectOption TItem="string" TItemValue="string" Value="@("npr")" Label="NPR" />
+                    <SelectOption TItem="string" TItemValue="string" Value="@("dollor")" Label="Dollar" />
+                    <SelectOption TItem="string" TItemValue="string" Value="@("euro")" Label="Euro" />
+                </SelectOptions>
+            </Select>
+        </div>
+        <button type="submit" class="w-full rounded bg-green-700 py-2 text-white hover:bg-green-600">
+            Login
+        </button>
+       
+    </form>
 </div>
 
 @code {
-    private string Username { get; set; }
-    private string Password { get; set; }
+    [Parameter]
+    public bool isAuthenticated { get; set; }
+    [Parameter]
+    public EventCallback<bool> IsAuthenticatedChanged { get; set; }
 
-    private void HandleLogin()
+    private string Username = "";
+    private string Password = "";
+    private string ErrorMessage = "";
+    private string SelectedCurrency = "npr";
+
+    private void OnCurrencyChanged(string curr)
     {
-        // Add authentication logic here
-        Console.WriteLine($"Login attempt: {Username}");
+        Console.WriteLine("Currency Changed");
+        SelectedCurrency = curr;
+        Console.WriteLine(SelectedCurrency);
+        Console.WriteLine(curr);
+    }
+
+    private async Task HandleLogin()
+    {
+        if (Username == "nilak" && Password == "nilak123")
+        {
+            ErrorMessage = "";
+            isAuthenticated = true;
+            await IsAuthenticatedChanged.InvokeAsync(true);
+        }
+        else
+        {
+            ErrorMessage = "Invalid Credentials";
+        }
     }
 }
- *@

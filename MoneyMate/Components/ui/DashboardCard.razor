@@ -1,12 +1,27 @@
-﻿<Card Class="!rounded-lg !shadow-lg">
-   <h2 class="text-xl font-bold md:text-2xl">@title</h2>
+﻿@using MoneyMate.Models
+@using MoneyMate.Helpers
+
+<Card Class="!rounded-lg !shadow-lg">
+    <h2 class="text-xl font-bold md:text-2xl">Rs. @total</h2>
     <p class="text-base font-semibold">@content</p>
 </Card>
 
 @code {
     [Parameter]
-    public required string  title { get; set; }
+    
+    public required TransactionType TransactionType { get; set; }
 
     [Parameter]
     public required string content { get; set; }
+
+    private List<TransactionModel> allTransaction;
+    private decimal total;
+
+    protected override void OnInitialized()
+    {
+        allTransaction = TransactionHelper.GetAllTransactions();
+        total = allTransaction.Where(t => t.transactionType == TransactionType).Sum(t => t.amount);
+    }
+
+    
 }

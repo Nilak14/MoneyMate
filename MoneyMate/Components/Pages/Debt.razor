@@ -1,0 +1,49 @@
+﻿@page "/debt"
+@using MoneyMate.Components.ui
+
+<div class="mb-10 flex w-full items-end justify-end">
+    <Button OnClick="ShowDebtModal"  Color="Color.Green8" Type="primary">
+        <Icon Type="plus" Theme="Outline" />
+        Add Debts
+    </Button>
+</div>
+
+
+<Modal Centered="true"
+       Title="Add Debt"
+       @bind-Visible="isAddDebtModalVisible"
+       OnCancel="HandleCancel"
+       Footer="@ModalFooter.DefaultCancelFooter">
+
+    <AddDebtForm isModalOpened="@isAddDebtModalVisible" OnDebtAdded="HandleDebtAdded" />
+
+</Modal>
+<DebtTable @ref="debtTable" />
+@code {
+    private bool isAddDebtModalVisible = false;
+    private DebtTable debtTable;
+
+
+    private void ShowDebtModal()
+    {
+        isAddDebtModalVisible = true;
+
+    }
+
+
+
+
+    private void HandleCancel()
+    {
+
+        isAddDebtModalVisible = false;
+
+    }
+
+    private void HandleDebtAdded()
+    {
+        isAddDebtModalVisible = false;
+        debtTable.RefreshTransactions();
+    }
+
+}

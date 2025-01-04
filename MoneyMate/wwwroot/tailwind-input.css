@@ -20,3 +20,7 @@
 .ant-btn-primary{
     @apply !border-green-700 !bg-green-700;
 }
+
+.ant-btn.ant-btn-default{
+    @apply !bg-red-500 !text-white;
+}

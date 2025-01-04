@@ -62,7 +62,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <MauiImage Include="wwwroot\logo.png" />
+      <MauiImage Include="wwwroot\images\logo.png" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,0 +1,120 @@
+﻿@using System.ComponentModel.DataAnnotations;
+@using System.Text.Json;
+@using MoneyMate.Models;
+@using MoneyMate.Helpers;
+@inject IMessageService _message
+
+<div class="w-full space-y-6 self-start">
+    <Form Model="@ExpensesTransaction"
+          OnFinish="OnFinish"
+          OnFinishFailed="OnFinishFailed"
+          LabelColSpan="8"
+          WrapperColSpan="16">
+
+        <div class="space-y-4">
+            <!-- Title Input -->
+            <FormItem Label="Title">
+                <Input required @bind-Value="@ExpensesTransaction.title" class="w-full rounded-md border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </FormItem>
+
+            <!-- Amount Input -->
+            <FormItem Label="Amount">
+                <Input required Type="number" @bind-Value="@ExpensesTransaction.amount" class="w-full rounded-md border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </FormItem>
+
+            <!-- Tag Dropdown -->
+            <FormItem Label="Tag">
+                <Select required @bind-Value="@ExpensesTransaction.transactionTagId" OnChange="onTagChanged" TItem="string" TItemValue="string" class="w-full rounded-md border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <SelectOptions>
+                        @foreach (var tag in tags)
+                        {
+                            <SelectOption TItem="string" TItemValue="string" Value="@tag.tagId" Label="@tag.tagName" />
+                        }
+                    </SelectOptions>
+                </Select>
+            </FormItem>
+
+            <!-- Date Picker -->
+            <FormItem Label="Date">
+                <DatePicker @bind-Value="@ExpensesTransaction.transactionDate" class="w-full rounded-md border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </FormItem>
+
+            <!-- Note Input -->
+            <FormItem Label="Note">
+                <Input @bind-Value="@ExpensesTransaction.note" />
+            </FormItem>
+
+            <!-- Submit Button -->
+            <FormItem WrapperColOffset="8" WrapperColSpan="16">
+                <Button Color="Color.Green8" Type="primary" Class="w-full" HtmlType="submit">
+                    Add Expenses
+                </Button>
+            </FormItem>
+        </div>
+    </Form>
+</div>
+
+
+@code {
+    [Parameter]
+    public bool isModalOpened { get; set; }
+    
+
+    private List<TagsModel> tags = new List<TagsModel>();
+   
+    protected override async Task OnInitializedAsync()
+    {
+        tags = await TagsHelper.InitializeOrGetTags();
+    }
+
+
+    private TransactionModel ExpensesTransaction = new TransactionModel
+        {
+            transactionId = Guid.NewGuid().ToString(),
+            transactionDate = DateTime.Now,
+            transactionType = TransactionType.Expense
+        };
+
+    private void onTagChanged(string transactionId)
+    {
+        Console.WriteLine("Currency Changed");
+        ExpensesTransaction.transactionId = transactionId;
+    }
+
+    private async Task OnFinish(EditContext editContext)
+    {
+        try
+        {
+            await TransactionHelper.AddTransaction(ExpensesTransaction);
+            await _message.Success($"{ExpensesTransaction.title} is added");
+           
+            ResetForm();
+        }catch{            
+            await _message.Error("Failed to add Expenses");
+        }
+    }
+
+    private async Task  OnFinishFailed(EditContext editContext)
+    {
+        await _message.Error("Failed to add expenses");
+    }
+
+    protected override void OnParametersSet()
+    {
+
+        if (isModalOpened)
+        {
+            ResetForm();
+        }
+    }
+
+    private void ResetForm()
+    {
+        ExpensesTransaction = new TransactionModel
+            {
+                transactionId = Guid.NewGuid().ToString(),
+                transactionDate = DateTime.Now,
+                transactionType = TransactionType.Expense
+            };
+    }
+}

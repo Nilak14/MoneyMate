@@ -1,0 +1,39 @@
+﻿@page "/debt"
+@using MoneyMate.Components.ui
+
+
+<Button OnClick="ShowDebtModal" Shape="round" Color="Color.Green8" Type="primary">
+    <Icon Type="plus" Theme="Outline" />
+    Add Debt
+</Button>
+<Modal OkText="@("Add Debt")"
+       Centered="true"
+       Title="Add Debt"
+       @bind-Visible="isAddDebtModalVisible"
+       OnOk="HandleAddDebtAsync"
+       OnCancel="HandleCancel">
+    <p>Are you sure you want to Log out?</p>
+</Modal>
+@code {
+ private bool isAddDebtModalVisible = false;
+
+    private void ShowDebtModal()
+    {
+        isAddDebtModalVisible = true;
+    }
+
+
+    private async Task HandleAddDebtAsync()
+    {
+        await Task.Delay(500);
+        
+        isAddDebtModalVisible = false;
+
+    }
+
+    private void HandleCancel()
+    {
+        isAddDebtModalVisible = false;
+    }
+
+}

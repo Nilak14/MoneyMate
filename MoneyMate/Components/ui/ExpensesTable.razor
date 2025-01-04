@@ -1,0 +1,30 @@
+﻿@using MoneyMate.Helpers;
+@using MoneyMate.Models;
+@using System.Linq;
+
+@if (allTransaction.Where(t => t.transactionType == TransactionType.Expense).Any())
+{
+    @foreach (var transaction in allTransaction.Where(t => t.transactionType == TransactionType.Expense))
+    {
+        <div class="transaction-item">
+            <p><strong>Title:</strong> @transaction.title</p>
+            <p><strong>Amount:</strong> @transaction.amount</p>
+            <p><strong>Date:</strong> @transaction.transactionDate.ToShortDateString()</p>
+            <p><strong>Note:</strong> @transaction.note</p>
+        </div>
+    }
+}
+else
+{
+    <p>No transactions found.</p>
+}
+
+@code {
+    private List<TransactionModel> allTransaction;
+
+    protected override void OnInitialized()
+    {
+        allTransaction = TransactionHelper.GetAllTransactions();
+    }
+  
+}

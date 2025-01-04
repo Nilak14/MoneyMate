@@ -1,0 +1,36 @@
+﻿@page "/expenses"
+@using MoneyMate.Components.ui
+@using MoneyMate.Models
+<Button OnClick="ShowExpensesModal" Shape="round" Color="Color.Green8" Type="primary">
+    <Icon Type="plus" Theme="Outline" />
+    Add Expenses
+</Button>
+<Modal OkText="@("Add Expenses")"
+       Centered="true"
+       Title="Add Expenses"
+       Footer="@ModalFooter.DefaultCancelFooter"
+       @bind-Visible="isAddExpensesModalVisible"
+       
+       OnCancel="HandleCancel">
+    <AddExpensesForm OnExpenseAdded="HandleExpenseAdded" isModalOpened="@isAddExpensesModalVisible" />
+</Modal>
+<ExpensesTable/>
+@code {
+    private bool isAddExpensesModalVisible = false;
+
+
+    private void ShowExpensesModal()
+    {
+        isAddExpensesModalVisible = true;
+    }
+
+
+
+
+    private void HandleCancel()
+    {
+        isAddExpensesModalVisible = false;
+    }
+
+
+}

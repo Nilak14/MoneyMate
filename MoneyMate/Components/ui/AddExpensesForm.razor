@@ -46,9 +46,10 @@
 
             <!-- Submit Button -->
             <FormItem WrapperColOffset="8" WrapperColSpan="16">
-                <Button Color="Color.Green8" Type="primary" Class="w-full" HtmlType="submit">
+                <Button  Loading="@IsLoading" Color="Color.Green8" Type="primary" Class="w-full" HtmlType="submit">
                     Add Expenses
                 </Button>
+                
             </FormItem>
         </div>
     </Form>
@@ -58,10 +59,13 @@
 @code {
     [Parameter]
     public bool isModalOpened { get; set; }
-    
+    [Parameter]
+    public EventCallback OnExpenseAdded { get; set; }
+
+    private bool IsLoading = false;
 
     private List<TagsModel> tags = new List<TagsModel>();
-   
+
     protected override async Task OnInitializedAsync()
     {
         tags = await TagsHelper.InitializeOrGetTags();
@@ -77,20 +81,38 @@
 
     private void onTagChanged(string transactionId)
     {
-        Console.WriteLine("Currency Changed");
+       
         ExpensesTransaction.transactionId = transactionId;
     }
 
     private async Task OnFinish(EditContext editContext)
     {
+        if (ExpensesTransaction.transactionTagId == null)
+        {
+            await _message.Error("Please select a tag");
+            return;
+        }
+
+        if (ExpensesTransaction.amount <= 0)
+        {
+            await _message.Error("Amount should be greater than 0");
+            return;
+        }
+      
         try
         {
+        
+            IsLoading = true;
             await TransactionHelper.AddTransaction(ExpensesTransaction);
+            await OnExpenseAdded.InvokeAsync();
             await _message.Success($"{ExpensesTransaction.title} is added");
-           
             ResetForm();
         }catch{            
             await _message.Error("Failed to add Expenses");
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 

@@ -16,7 +16,7 @@ namespace MoneyMate.Models
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public  DebtStatus? debtStatus { get; set; } 
         public string debtSource { get; set; }
-        public DateTime debtDueDate { get; set; }
+        public DateTime? debtDueDate { get; set; }
 
     }
 }

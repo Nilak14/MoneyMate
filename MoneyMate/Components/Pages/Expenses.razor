@@ -14,10 +14,10 @@
        OnCancel="HandleCancel">
     <AddExpensesForm OnExpenseAdded="HandleExpenseAdded" isModalOpened="@isAddExpensesModalVisible" />
 </Modal>
-<ExpensesTable/>
+<ExpensesTable @ref="expensesTable"  />
 @code {
     private bool isAddExpensesModalVisible = false;
-
+    private ExpensesTable expensesTable;
 
     private void ShowExpensesModal()
     {
@@ -32,5 +32,10 @@
         isAddExpensesModalVisible = false;
     }
 
+    private void HandleExpenseAdded()
+    {
+        isAddExpensesModalVisible = false;
+        expensesTable.RefreshTransactions();
+    }
 
 }

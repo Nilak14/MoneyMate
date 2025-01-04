@@ -9,6 +9,7 @@
         <div class="transaction-item">
             <p><strong>Title:</strong> @transaction.title</p>
             <p><strong>Amount:</strong> @transaction.amount</p>
+            <p><strong>Type:</strong> @transaction.transactionType</p>
             <p><strong>Date:</strong> @transaction.transactionDate.ToShortDateString()</p>
             <p><strong>Note:</strong> @transaction.note</p>
         </div>
@@ -21,6 +22,13 @@ else
 
 @code {
     private List<TransactionModel> allTransaction;
+
+    public void RefreshTransactions()
+    {
+        allTransaction = TransactionHelper.GetAllTransactions();
+        StateHasChanged();
+    }
+
 
     protected override void OnInitialized()
     {

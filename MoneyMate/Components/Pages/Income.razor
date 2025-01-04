@@ -1,25 +1,29 @@
 ﻿@page "/income"
 @using MoneyMate.Components.ui
 
+<div class="mb-10 flex w-full items-end justify-end">
+    <Button OnClick="ShowIncomeModal" Color="Color.Green8" Type="primary">
+        <Icon Type="plus" Theme="Outline" />
+        Add Income
+    </Button>
 
-<Button OnClick="ShowIncomeModal" Shape="round" Color="Color.Green8" Type="primary">
-    <Icon Type="plus" Theme="Outline" />
-   Add Income
-</Button>
+</div>
+
 
 <Modal 
     Centered="true"
-       Title="Add Expenses"
+       Title="Add Income"
        @bind-Visible="isAddIncomeModalVisible"
        OnCancel="HandleCancel"
        Footer="@ModalFooter.DefaultCancelFooter">
-      
-   <AddIncomeForm isModalOpened="@isAddIncomeModalVisible" />
+
+    <AddIncomeForm isModalOpened="@isAddIncomeModalVisible" OnIncomeAdded="HandleIncomeAdded" />
      
 </Modal>
-
-@code {
-    private bool isAddIncomeModalVisible = false;
+<IncomeTable @ref="incomeTable" />
+@code {     
+    private bool isAddIncomeModalVisible = false; 
+    private IncomeTable incomeTable;
 
 
     private void ShowIncomeModal()
@@ -29,19 +33,19 @@
     }
 
 
-    private async Task HandleAddIncomeAsync()
-    {
-        await Task.Delay(500);
-
-        isAddIncomeModalVisible = false;
-
-    }
+  
 
     private void HandleCancel()
     {
 
         isAddIncomeModalVisible = false;
        
+    }
+
+    private void HandleIncomeAdded()
+    {
+        isAddIncomeModalVisible = false;
+        incomeTable.RefreshTransactions();
     }
 
 }

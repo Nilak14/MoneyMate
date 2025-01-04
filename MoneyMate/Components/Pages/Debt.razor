@@ -1,39 +1,49 @@
 ﻿@page "/debt"
 @using MoneyMate.Components.ui
 
+<div class="mb-10 flex w-full items-end justify-end">
+    <Button OnClick="ShowDebtModal"  Color="Color.Green8" Type="primary">
+        <Icon Type="plus" Theme="Outline" />
+        Add Debts
+    </Button>
+</div>
 
-<Button OnClick="ShowDebtModal" Shape="round" Color="Color.Green8" Type="primary">
-    <Icon Type="plus" Theme="Outline" />
-    Add Debt
-</Button>
-<Modal OkText="@("Add Debt")"
-       Centered="true"
+
+<Modal Centered="true"
        Title="Add Debt"
        @bind-Visible="isAddDebtModalVisible"
-       OnOk="HandleAddDebtAsync"
-       OnCancel="HandleCancel">
-    <p>Are you sure you want to Log out?</p>
+       OnCancel="HandleCancel"
+       Footer="@ModalFooter.DefaultCancelFooter">
+
+    <AddDebtForm isModalOpened="@isAddDebtModalVisible" OnDebtAdded="HandleDebtAdded" />
+
 </Modal>
+<DebtTable @ref="debtTable" />
 @code {
- private bool isAddDebtModalVisible = false;
+    private bool isAddDebtModalVisible = false;
+    private DebtTable debtTable;
+
 
     private void ShowDebtModal()
     {
         isAddDebtModalVisible = true;
-    }
-
-
-    private async Task HandleAddDebtAsync()
-    {
-        await Task.Delay(500);
-        
-        isAddDebtModalVisible = false;
 
     }
+
+
+
 
     private void HandleCancel()
     {
+
         isAddDebtModalVisible = false;
+
+    }
+
+    private void HandleDebtAdded()
+    {
+        isAddDebtModalVisible = false;
+        debtTable.RefreshTransactions();
     }
 
 }

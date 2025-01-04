@@ -14,17 +14,17 @@
         <div class="space-y-4">
             <!-- Title Input -->
             <FormItem Label="Title">
-                <Input required @bind-Value="@ExpensesTransaction.title" class="w-full rounded-md border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <Input required @bind-Value="@ExpensesTransaction.title" />
             </FormItem>
 
             <!-- Amount Input -->
             <FormItem Label="Amount">
-                <Input required Type="number" @bind-Value="@ExpensesTransaction.amount" class="w-full rounded-md border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <Input required Type="number" @bind-Value="@ExpensesTransaction.amount"  />
             </FormItem>
 
             <!-- Tag Dropdown -->
             <FormItem Label="Tag">
-                <Select required @bind-Value="@ExpensesTransaction.transactionTagId" OnChange="onTagChanged" TItem="string" TItemValue="string" class="w-full rounded-md border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <Select required @bind-Value="@ExpensesTransaction.transactionTagId"  TItem="string" TItemValue="string" >
                     <SelectOptions>
                         @foreach (var tag in tags)
                         {
@@ -36,7 +36,7 @@
 
             <!-- Date Picker -->
             <FormItem Label="Date">
-                <DatePicker @bind-Value="@ExpensesTransaction.transactionDate" class="w-full rounded-md border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <DatePicker DisabledDate="@(date => date > DateTime.Today)" @bind-Value="@ExpensesTransaction.transactionDate" class="w-full" />
             </FormItem>
 
             <!-- Note Input -->
@@ -79,11 +79,7 @@
             transactionType = TransactionType.Expense
         };
 
-    private void onTagChanged(string transactionId)
-    {
-       
-        ExpensesTransaction.transactionId = transactionId;
-    }
+  
 
     private async Task OnFinish(EditContext editContext)
     {

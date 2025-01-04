@@ -6,7 +6,7 @@
 <div class="mb-4 flex w-full items-center justify-between gap-20">
     <!-- Search Input -->
     <div class="w-[50vw]">
-        <Input Placeholder="Search By Title" AllowClear="true" OnChange="onChange" TValue="string" />
+        <Input  Placeholder="Search By Title" AllowClear="true" OnChange="onChange" TValue="string" />
     </div>
 
     <!-- Sort and Filter -->
@@ -21,7 +21,7 @@
             </SelectOptions>
         </Select>
 
-
+  
     </div>
 </div>
 
@@ -62,7 +62,9 @@
         </tbody>
     </table>
 </div>
-
+@* <p>@searchTerm</p>
+<p>@selectedTagId</p>
+<p>@JsonSerializer.Serialize(filteredTransactions)</p> *@
 
 @code {
     private List<TransactionModel> allTransaction;
@@ -76,14 +78,14 @@
     protected override async Task OnInitializedAsync()
     {
         allTransaction = TransactionHelper.GetAllTransactions();
-        allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Expense).ToList();
+        allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Income).ToList();
         filteredTransactions = allTransaction;
         allTags = await TagsHelper.InitializeOrGetTags();
     }
     public void RefreshTransactions()
     {
         allTransaction = TransactionHelper.GetAllTransactions();
-        allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Expense).ToList();
+        allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Income).ToList();
         filteredTransactions = allTransaction;
 
         StateHasChanged();
@@ -105,7 +107,7 @@
     private void ApplyFilters()
     {
         filteredTransactions = allTransaction
-            .Where(t => t.transactionType == TransactionType.Expense &&
+            .Where(t => t.transactionType == TransactionType.Income &&
                         (string.IsNullOrEmpty(searchTerm) || t.title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) &&
                         (string.IsNullOrEmpty(selectedTagId) || t.transactionTagId == selectedTagId)).ToList();
     }

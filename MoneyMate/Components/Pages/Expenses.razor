@@ -1,10 +1,14 @@
 ﻿@page "/expenses"
 @using MoneyMate.Components.ui
 @using MoneyMate.Models
-<Button OnClick="ShowExpensesModal" Shape="round" Color="Color.Green8" Type="primary">
-    <Icon Type="plus" Theme="Outline" />
-    Add Expenses
-</Button>
+
+<div class="mb-10 flex w-full items-end justify-end">
+    <Button OnClick="ShowExpensesModal" Color="Color.Green8" Type="primary">
+        <Icon Type="plus" Theme="Outline" />
+        Add Expenses
+    </Button>
+</div>
+
 <Modal OkText="@("Add Expenses")"
        Centered="true"
        Title="Add Expenses"

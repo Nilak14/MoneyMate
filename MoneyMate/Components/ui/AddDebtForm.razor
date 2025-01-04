@@ -1,11 +1,12 @@
-﻿@using System.ComponentModel.DataAnnotations;
+﻿
+@using System.ComponentModel.DataAnnotations;
 @using System.Text.Json;
 @using MoneyMate.Models;
 @using MoneyMate.Helpers;
 @inject IMessageService _message
 
 <div class="w-full space-y-6 self-start">
-    <Form Model="@IncomeTransaction"
+    <Form Model="@DebtTransaction"
           OnFinish="OnFinish"
           OnFinishFailed="OnFinishFailed"
           LabelColSpan="8"
@@ -14,41 +15,38 @@
         <div class="space-y-4">
             <!-- Title Input -->
             <FormItem Label="Title">
-                <Input required @bind-Value="@IncomeTransaction.title" />
+                <Input required @bind-Value="@DebtTransaction.title"  />
             </FormItem>
 
             <!-- Amount Input -->
             <FormItem Label="Amount">
-                <Input required Type="number" @bind-Value="@IncomeTransaction.amount"  />
+                <Input required Type="number" @bind-Value="@DebtTransaction.amount"/>
             </FormItem>
-
-            <!-- Tag Dropdown -->
-            <FormItem Label="Tag">
-                <Select required @bind-Value="@IncomeTransaction.transactionTagId"  TItem="string" TItemValue="string" >
-                    <SelectOptions>
-                        @foreach (var tag in tags)
-                        {
-                            <SelectOption TItem="string" TItemValue="string" Value="@tag.tagId" Label="@tag.tagName" />
-                        }
-                    </SelectOptions>
-                </Select>
-            </FormItem>
-
+            <!-- Debt Transaction Date -->
             <!-- Date Picker -->
             <FormItem Label="Date">
-
-                <DatePicker DisabledDate="@(date => date > DateTime.Today)" @bind-Value="@IncomeTransaction.transactionDate"  />
+                <DatePicker DisabledDate="@(date => date > DateTime.Today)" @bind-Value="@DebtTransaction.transactionDate" class="w-full" />
             </FormItem>
+            <!-- Debt Due Date -->
+            <FormItem Label="Debt Due Date">
+
+                <DatePicker @bind-Value="@DebtTransaction.debtDueDate"  />
+            </FormItem>
+            <!-- Debt Soruce -->
+            <FormItem Label="Debt Source">
+                <Input required @bind-Value="@DebtTransaction.debtSource"  />
+            </FormItem>
+
 
             <!-- Note Input -->
             <FormItem Label="Note">
-                <Input @bind-Value="@IncomeTransaction.note" />
+                <Input @bind-Value="@DebtTransaction.note" />
             </FormItem>
 
             <!-- Submit Button -->
             <FormItem WrapperColOffset="8" WrapperColSpan="16">
                 <Button Loading="@IsLoading" Color="Color.Green8" Type="primary" Class="w-full" HtmlType="submit">
-                    Add Income
+                    Add Debt
                 </Button>
 
             </FormItem>
@@ -61,7 +59,7 @@
     [Parameter]
     public bool isModalOpened { get; set; }
     [Parameter]
-    public EventCallback OnIncomeAdded { get; set; }
+    public EventCallback OnDebtAdded { get; set; }
 
     private bool IsLoading = false;
 
@@ -73,24 +71,24 @@
     }
 
 
-    private TransactionModel IncomeTransaction = new TransactionModel
+    private TransactionModel DebtTransaction = new TransactionModel
         {
             transactionId = Guid.NewGuid().ToString(),
             transactionDate = DateTime.Now,
-            transactionType = TransactionType.Income
+            transactionType = TransactionType.Debt
         };
 
- 
+    private void onTagChanged(string transactionId)
+    {
+
+        DebtTransaction.transactionId = transactionId;
+    }
 
     private async Task OnFinish(EditContext editContext)
     {
-        if (IncomeTransaction.transactionTagId == null)
-        {
-            await _message.Error("Please select a tag");
-            return;
-        }
+       
 
-        if (IncomeTransaction.amount <= 0)
+        if (DebtTransaction.amount <= 0)
         {
             await _message.Error("Amount should be greater than 0");
             return;
@@ -100,14 +98,14 @@
         {
 
             IsLoading = true;
-            await TransactionHelper.AddTransaction(IncomeTransaction);
-            await OnIncomeAdded.InvokeAsync();
-            await _message.Success($"{IncomeTransaction.title} is added");
+            await TransactionHelper.AddTransaction(DebtTransaction);
+            await OnDebtAdded.InvokeAsync();
+            await _message.Success($"{DebtTransaction.title} is added");
             ResetForm();
         }
         catch
         {
-            await _message.Error("Failed to add Expenses");
+            await _message.Error("Failed to add Debt");
         }
         finally
         {
@@ -131,11 +129,11 @@
 
     private void ResetForm()
     {
-        IncomeTransaction = new TransactionModel
+        DebtTransaction = new TransactionModel
             {
                 transactionId = Guid.NewGuid().ToString(),
                 transactionDate = DateTime.Now,
-                transactionType = TransactionType.Income
+                transactionType = TransactionType.Debt
             };
     }
 }

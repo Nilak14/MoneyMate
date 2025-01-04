@@ -14,11 +14,8 @@
         {
             <div class="flex items-center px-6 py-2 text-base">
                 <NavLink class="flex h-full w-full items-center gap-4 rounded-md px-4 py-2 text-black hover:text-white hover:bg-green-700" href="@route.Href" Match="NavLinkMatch.All">
-                    
-                    <Icon  Height="2em" Width="2em" Type="@route.Icon" Theme="outline" />
-                   
+                    <Icon  Height="2em" Width="2em" Type="@route.Icon" Theme="outline" />                   
                     <span>@route.Name</span>
-
                 </NavLink>
 
             </div>
@@ -30,9 +27,10 @@
   
     private readonly List<Route> routes = new()
     {
-        new Route { Name = "Dahsboard", Href = "", Icon = "appstore" },
-        new Route { Name = "Transections", Href = "counter", Icon = "transaction" },
-        new Route { Name = "Debt", Href = "weather", Icon = "account-book" }
+        new Route { Name = "Dahsboard", Href = "", Icon = "appstore"},
+        new Route { Name = "Income", Href = "income", Icon = "dollar"},
+        new Route { Name = "Expenditure", Href = "expenses", Icon = "credit-card" },
+        new Route { Name = "Debt", Href = "debt", Icon = "bank" }
     };
 
     private record Route

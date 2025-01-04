@@ -1,0 +1,139 @@
+﻿
+@using System.ComponentModel.DataAnnotations;
+@using System.Text.Json;
+@using MoneyMate.Models;
+@using MoneyMate.Helpers;
+@inject IMessageService _message
+
+<div class="w-full space-y-6 self-start">
+    <Form Model="@DebtTransaction"
+          OnFinish="OnFinish"
+          OnFinishFailed="OnFinishFailed"
+          LabelColSpan="8"
+          WrapperColSpan="16">
+
+        <div class="space-y-4">
+            <!-- Title Input -->
+            <FormItem Label="Title">
+                <Input required @bind-Value="@DebtTransaction.title"  />
+            </FormItem>
+
+            <!-- Amount Input -->
+            <FormItem Label="Amount">
+                <Input required Type="number" @bind-Value="@DebtTransaction.amount"/>
+            </FormItem>
+            <!-- Debt Transaction Date -->
+            <!-- Date Picker -->
+            <FormItem Label="Date">
+                <DatePicker DisabledDate="@(date => date > DateTime.Today)" @bind-Value="@DebtTransaction.transactionDate" class="w-full" />
+            </FormItem>
+            <!-- Debt Due Date -->
+            <FormItem Label="Debt Due Date">
+
+                <DatePicker @bind-Value="@DebtTransaction.debtDueDate"  />
+            </FormItem>
+            <!-- Debt Soruce -->
+            <FormItem Label="Debt Source">
+                <Input required @bind-Value="@DebtTransaction.debtSource"  />
+            </FormItem>
+
+
+            <!-- Note Input -->
+            <FormItem Label="Note">
+                <Input @bind-Value="@DebtTransaction.note" />
+            </FormItem>
+
+            <!-- Submit Button -->
+            <FormItem WrapperColOffset="8" WrapperColSpan="16">
+                <Button Loading="@IsLoading" Color="Color.Green8" Type="primary" Class="w-full" HtmlType="submit">
+                    Add Debt
+                </Button>
+
+            </FormItem>
+        </div>
+    </Form>
+</div>
+
+
+@code {
+    [Parameter]
+    public bool isModalOpened { get; set; }
+    [Parameter]
+    public EventCallback OnDebtAdded { get; set; }
+
+    private bool IsLoading = false;
+
+    private List<TagsModel> tags = new List<TagsModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        tags = await TagsHelper.InitializeOrGetTags();
+    }
+
+
+    private TransactionModel DebtTransaction = new TransactionModel
+        {
+            transactionId = Guid.NewGuid().ToString(),
+            transactionDate = DateTime.Now,
+            transactionType = TransactionType.Debt
+        };
+
+    private void onTagChanged(string transactionId)
+    {
+
+        DebtTransaction.transactionId = transactionId;
+    }
+
+    private async Task OnFinish(EditContext editContext)
+    {
+       
+
+        if (DebtTransaction.amount <= 0)
+        {
+            await _message.Error("Amount should be greater than 0");
+            return;
+        }
+
+        try
+        {
+
+            IsLoading = true;
+            await TransactionHelper.AddTransaction(DebtTransaction);
+            await OnDebtAdded.InvokeAsync();
+            await _message.Success($"{DebtTransaction.title} is added");
+            ResetForm();
+        }
+        catch
+        {
+            await _message.Error("Failed to add Debt");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task OnFinishFailed(EditContext editContext)
+    {
+        await _message.Error("Failed to add expenses");
+    }
+
+    protected override void OnParametersSet()
+    {
+
+        if (isModalOpened)
+        {
+            ResetForm();
+        }
+    }
+
+    private void ResetForm()
+    {
+        DebtTransaction = new TransactionModel
+            {
+                transactionId = Guid.NewGuid().ToString(),
+                transactionDate = DateTime.Now,
+                transactionType = TransactionType.Debt
+            };
+    }
+}

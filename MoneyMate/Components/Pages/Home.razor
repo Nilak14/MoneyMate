@@ -1,16 +1,15 @@
 ﻿@page "/"
-
+@using MoneyMate.Models
 @using AntDesign.Charts
+@using MoneyMate.Helpers
 @using MoneyMate.Components.ui
 @using Title = AntDesign.Charts.Title
 
-
-<div class="mb-10 grid w-full gap-8 grid-cols-1  md:grid-cols-2 lg:grid-cols-3">
-    <DashboardCard title="$ 2000" content="Total Income" />
-    <DashboardCard title="$ 20000" content="Total Expenditure" />
-    <DashboardCard title="$ 200000" content="Total Debt" />
+<div class="grid-cols-1 mb-10 grid w-full gap-8 md:grid-cols-2 lg:grid-cols-3">
+    <DashboardCard TransactionType="@TransactionType.Income" content="Total Income" />
+    <DashboardCard TransactionType="@TransactionType.Expense" content="Total Expenses" />
+    <DashboardCard TransactionType="@TransactionType.Debt" content="Total Debt" />
 </div>
-
 
 <div class="container mx-auto flex flex-wrap gap-5">
     <!-- Weekly Chart Container -->
@@ -19,12 +18,12 @@
         <Tabs>
             <TabPane Tab="Income">
                 <div class="w-full">
-                    <BarGraph Data="income" Config="incomeConfig" />
+                    <BarGraph Data="weeklyIncomeData" Config="incomeConfig" />
                 </div>
             </TabPane>
             <TabPane Tab="Expenditure">
                 <div class="w-full">
-                    <BarGraph Data="expenditure" Config="expenditureConfig" />
+                    <BarGraph Data="weeklyExpenditureData" Config="expenditureConfig" />
                 </div>
             </TabPane>
         </Tabs>
@@ -34,116 +33,47 @@
     <div class="border-2 flex-1 min-w-full rounded-md border-black bg-white p-4 lg:min-w-[45%]">
         <h1 class="text-center text-xl font-bold">This Month</h1>
         <div class="w-full">
-            <PieChart Data="pieData" Config="pieConfig" />
+            <PieChart Data="monthlyPieData" Config="pieConfig" />
         </div>
     </div>
 </div>
 
-
-
-
 @code {
+    private List<TransactionModel> allTransactions;
 
-    
+    // Weekly Income and Expenditure Data
+    private object[] weeklyIncomeData;
+    private object[] weeklyExpenditureData;
 
-    readonly object[] income =
-    {
-        new {day = "sun",
-            income = 20000,
-        }, new {day = "mon",
-            income = 10000,
-        }, new {day = "tue",
-            income = 200,
-        }, new {day = "wed",
-            income = 12000,
-        }, new {day = "thu",
-            income = 18000,
-        }, new {day = "fri",
-            income = 20000,
-        }, new {day = "sat",
-            income = 20000,
-        },
-       
-    };
+    // Monthly Pie Chart Data
+    private object[] monthlyPieData;
 
-    readonly ColumnConfig incomeConfig = new ColumnConfig
+    private readonly ColumnConfig incomeConfig = new ColumnConfig
         {
-          
-          
             XField = "day",
-            YField = "income",
+            YField = "amount",
             AutoFit = true,
             YAxis = new ValueAxis
             {
                 Min = 0
             },
-            Color = new[] { "#ae331b", "#1a6179" },
-            SeriesField = "type"
+            Color = new[] { "#1a6179" },
         };
 
-    
-
-
-
-
-    readonly object[] expenditure =
-    {
-        new {day = "sun",
-            expenditure = 20000,
-        }, new {day = "mon",
-            expenditure = 10000,
-        }, new {day = "tue",
-            expenditure = 200,
-        }, new {day = "wed",
-            expenditure = 12000,
-        }, new {day = "thu",
-            expenditure = 18000,
-        }, new {day = "fri",
-            expenditure = 20000,
-        }, new {day = "sat",
-            expenditure = 20000,
-        },
-       
-    };
-    readonly ColumnConfig expenditureConfig = new ColumnConfig
+    private readonly ColumnConfig expenditureConfig = new ColumnConfig
         {
-          
-            AutoFit = true,
             XField = "day",
-            YField = "expenditure",
+            YField = "amount",
+            AutoFit = true,
             YAxis = new ValueAxis
             {
                 Min = 0
             },
-            Color = new[] { "#00FF00", "#00FF00" },
-            SeriesField = "type"
+            Color = new[] { "#ae331b" },
         };
 
-   
-    readonly object[] pieData =
-       {
-        new
+    private readonly PieConfig pieConfig = new PieConfig
         {
-            type = "Income",
-            value = 40000
-        },
-        new
-        {
-            type = "Expenditure",
-            value = 25000
-        },
-        new
-        {
-            type = "Debt",
-            value = 18000
-        },
-       
-    };
-
-    readonly PieConfig pieConfig = new PieConfig
-        {
-           
-            
             AppendPadding = 10,
             InnerRadius = 0.6,
             Radius = 0.8,
@@ -151,6 +81,58 @@
             AngleField = "value",
             ColorField = "type",
             AutoFit = true,
-
         };
+
+    protected override void OnInitialized()
+    {
+        allTransactions = TransactionHelper.GetAllTransactions();
+
+        PrepareWeeklyData();
+        PrepareMonthlyData();
+    }
+
+    private void PrepareWeeklyData()
+    {
+        var currentWeekStart = DateTime.Now.AddDays(-(int)DateTime.Now.DayOfWeek);
+        var allDaysOfWeek = Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>().ToArray();
+
+        var weeklyTransactions = allTransactions
+            .Where(t => t.transactionDate >= currentWeekStart)
+            .GroupBy(t => t.transactionDate?.DayOfWeek);
+
+        weeklyIncomeData = allDaysOfWeek.Select(day => new
+        {
+            day = day.ToString(),
+            amount = weeklyTransactions
+                .Where(g => g.Key == day)
+                .Select(g => g.Where(t => t.transactionType == TransactionType.Income).Sum(t => t.amount))
+                .FirstOrDefault()
+        }).ToArray();
+
+        weeklyExpenditureData = allDaysOfWeek.Select(day => new
+        {
+            day = day.ToString(),
+            amount = weeklyTransactions
+                .Where(g => g.Key == day)
+                .Select(g => g.Where(t => t.transactionType == TransactionType.Expense).Sum(t => t.amount))
+                .FirstOrDefault()
+        }).ToArray();
+    }
+
+    private void PrepareMonthlyData()
+    {
+        var currentMonth = DateTime.Now.Month;
+        var currentYear = DateTime.Now.Year;
+
+        var monthlyTotals = allTransactions
+            .Where(t => t.transactionDate?.Month == currentMonth && t.transactionDate?.Year == currentYear)
+            .GroupBy(t => t.transactionType)
+            .Select(g => new
+            {
+                type = g.Key.ToString(),
+                value = g.Sum(t => t.amount)
+            });
+
+        monthlyPieData = monthlyTotals.ToArray();
+    }
 }

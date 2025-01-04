@@ -1,0 +1,98 @@
+﻿@using MoneyMate.Helpers
+@using MoneyMate.Models
+@using System.Linq
+@using System.Text.Json
+
+<div class="mb-4 flex w-full items-center justify-between gap-20">
+    <!-- Search Input -->
+    <div class="w-[50vw]">
+        <Input Placeholder="Search By Title" AllowClear="true" OnChange="onChange" TValue="string" />
+    </div>
+
+    <!-- Sort and Filter -->
+    <div class="flex gap-5">
+        
+
+
+    </div>
+</div>
+
+<div class="overflow-x-auto">
+    <table class="min-w-full table-auto rounded-lg text-white">
+        <thead class="bg-green-700">
+            <tr>
+                <th class="cursor-pointer px-4 py-2">Title</th>
+                <th class="cursor-pointer px-4 py-2">Amount</th>
+                <th class="cursor-pointer px-4 py-2">Date</th>
+                <th class="px-4 py-2">Due Date</th>
+            </tr>
+        </thead>
+        <tbody class="bg-green-400 text-center font-semibold text-black">
+            @if (filteredTransactions.Count > 0)
+            {
+                @foreach (var transaction in filteredTransactions)
+                {
+                   
+                    <tr class="border-b border-b-white last:border-none">
+                        <td class="px-4 py-2">@transaction.title</td>
+                        <td class="px-4 py-2">@transaction.amount</td>
+                        <td class="px-4 py-2">@transaction.transactionDate?.ToShortDateString()</td>
+                        <td class="px-4 py-2">@transaction.debtDueDate?.ToShortDateString()</td>
+                       
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="px-4 py-2 text-center">No transactions found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@code {
+    private List<TransactionModel> allTransaction;
+    private List<TagsModel> allTags = new List<TagsModel>();
+    private List<TransactionModel> filteredTransactions;
+
+    private string searchTerm = string.Empty;
+    private string selectedTagId = string.Empty;
+    private DateTime?[] selectedDateRange = new DateTime?[2];
+
+    protected override async Task OnInitializedAsync()
+    {
+        allTransaction = TransactionHelper.GetAllTransactions();
+        allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Debt).ToList();
+        filteredTransactions = allTransaction;
+        allTags = await TagsHelper.InitializeOrGetTags();
+    }
+    public void RefreshTransactions()
+    {
+        allTransaction = TransactionHelper.GetAllTransactions();
+        allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Debt).ToList();
+        filteredTransactions = allTransaction;
+
+        StateHasChanged();
+    }
+    private void onChange(string value)
+    {
+        searchTerm = value;
+        ApplyFilters();
+
+    }
+
+   
+
+    private void ApplyFilters()
+    {
+        filteredTransactions = allTransaction
+            .Where(t => t.transactionType == TransactionType.Debt &&
+                        (string.IsNullOrEmpty(searchTerm) || t.title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))).ToList();
+    }
+
+
+
+}

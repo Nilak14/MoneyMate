@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @using MoneyMate.Components.Pages
-
+@using MoneyMate.Models;
+@using MoneyMate.Helpers;
 @if (!isAuthenticated)
 {
     <main>
@@ -25,7 +26,6 @@ else
                 </div>
                 <Modal
                        OkText="@("Log Out")"
-                       
                        Centered="true"
                        @bind-Visible="logoutModalVisible"
                        OnOk="HandleLogoutAsync"
@@ -54,11 +54,21 @@ else
         await Task.Delay(500);
         isAuthenticated = false;
         logoutModalVisible = false;
-       
+
     }
 
     private void HandleCancel()
     {
         logoutModalVisible = false;
     }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await TagsHelper.InitializeOrGetTags();
+        
+     
+    }
+
+
+
 }

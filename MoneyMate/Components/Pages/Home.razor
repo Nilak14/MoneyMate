@@ -1,8 +1,8 @@
 ﻿@page "/"
 @using MoneyMate.Models
 @using AntDesign.Charts
-@using MoneyMate.Helpers
 @using MoneyMate.Components.ui
+@using MoneyMate.Helpers
 @using Title = AntDesign.Charts.Title
 
 <div class="grid-cols-1 mb-10 grid w-full gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -93,39 +93,48 @@
 
     private void PrepareWeeklyData()
     {
-        var currentWeekStart = DateTime.Now.AddDays(-(int)DateTime.Now.DayOfWeek);
-        var allDaysOfWeek = Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>().ToArray();
+        // Get the start of the current week (Sunday)
+        var currentWeekStart = DateTime.Now.Date.AddDays(-(int)DateTime.Now.DayOfWeek);
+        var currentWeekEnd = currentWeekStart.AddDays(7);
 
+        var allDaysOfWeek = Enum.GetValues(typeof(DayOfWeek))
+            .Cast<DayOfWeek>()
+            .OrderBy(d => (int)d) 
+            .ToArray();
+
+        // Filter transactions for current week only
         var weeklyTransactions = allTransactions
-            .Where(t => t.transactionDate >= currentWeekStart)
-            .GroupBy(t => t.transactionDate?.DayOfWeek);
+            .Where(t => t.transactionDate?.Date >= currentWeekStart &&
+                        t.transactionDate?.Date < currentWeekEnd)
+            .ToList();
 
+        // Prepare income data
         weeklyIncomeData = allDaysOfWeek.Select(day => new
         {
             day = day.ToString(),
             amount = weeklyTransactions
-                .Where(g => g.Key == day)
-                .Select(g => g.Where(t => t.transactionType == TransactionType.Income).Sum(t => t.amount))
-                .FirstOrDefault()
+                .Where(t => t.transactionDate?.DayOfWeek == day &&
+                           t.transactionType == TransactionType.Income)
+                .Sum(t => t.amount)
         }).ToArray();
 
+        // Prepare expenditure data
         weeklyExpenditureData = allDaysOfWeek.Select(day => new
         {
             day = day.ToString(),
             amount = weeklyTransactions
-                .Where(g => g.Key == day)
-                .Select(g => g.Where(t => t.transactionType == TransactionType.Expense).Sum(t => t.amount))
-                .FirstOrDefault()
+                .Where(t => t.transactionDate?.DayOfWeek == day &&
+                           t.transactionType == TransactionType.Expense)
+                .Sum(t => t.amount)
         }).ToArray();
     }
 
     private void PrepareMonthlyData()
     {
         var currentMonth = DateTime.Now.Month;
-        var currentYear = DateTime.Now.Year;
 
         var monthlyTotals = allTransactions
-            .Where(t => t.transactionDate?.Month == currentMonth && t.transactionDate?.Year == currentYear)
+            .Where(t => t.transactionDate?.Month == currentMonth)
             .GroupBy(t => t.transactionType)
             .Select(g => new
             {

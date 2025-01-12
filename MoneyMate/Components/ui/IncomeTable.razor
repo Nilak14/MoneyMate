@@ -6,7 +6,11 @@
 <div class="mb-4 flex w-full items-center justify-between gap-20">
     <!-- Search Input -->
     <div class="w-[50vw]">
-        <Input  Placeholder="Search By Title" AllowClear="true" OnChange="onChange" TValue="string" />
+        <Input Placeholder="Search By Title"
+               AllowClear="true"
+               @bind-Value="searchTerm"
+               OnInput="HandleSearch"
+               TValue="string" />
     </div>
 
     <!-- Sort and Filter -->
@@ -20,8 +24,6 @@
                 }
             </SelectOptions>
         </Select>
-
-  
     </div>
 </div>
 
@@ -75,43 +77,74 @@
     private string selectedTagId = string.Empty;
     private DateTime?[] selectedDateRange = new DateTime?[2];
 
+    // Add debounce timer
+    private System.Timers.Timer searchTimer;
+
     protected override async Task OnInitializedAsync()
     {
         allTransaction = TransactionHelper.GetAllTransactions();
         allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Income).ToList();
         filteredTransactions = allTransaction;
         allTags = await TagsHelper.InitializeOrGetTags();
+
+        // Initialize debounce timer
+        searchTimer = new System.Timers.Timer(300); // 300ms delay
+        searchTimer.Elapsed += async (sender, e) => await SearchTimerElapsed();
+        searchTimer.AutoReset = false;
     }
+
+    private async Task HandleSearch(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+
+        // Reset and restart the timer
+        searchTimer.Stop();
+        searchTimer.Start();
+    }
+
+    private async Task SearchTimerElapsed()
+    {
+        await InvokeAsync(() =>
+        {
+            ApplyFilters();
+            StateHasChanged();
+        });
+    }
+
     public void RefreshTransactions()
     {
         allTransaction = TransactionHelper.GetAllTransactions();
         allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Income).ToList();
         filteredTransactions = allTransaction;
-
         StateHasChanged();
-    }
-    private void onChange(string value)
-    {
-        searchTerm = value;
-        ApplyFilters();
-
     }
 
     private void FilterByTag()
     {
         ApplyFilters();
-
-
     }
 
     private void ApplyFilters()
     {
-        filteredTransactions = allTransaction
-            .Where(t => t.transactionType == TransactionType.Income &&
-                        (string.IsNullOrEmpty(searchTerm) || t.title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) &&
-                        (string.IsNullOrEmpty(selectedTagId) || t.transactionTagId == selectedTagId)).ToList();
+        try
+        {
+            filteredTransactions = allTransaction
+                .Where(t => t.transactionType == TransactionType.Income &&
+                           (string.IsNullOrEmpty(searchTerm) ||
+                            t.title?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true) &&
+                           (string.IsNullOrEmpty(selectedTagId) ||
+                            t.transactionTagId == selectedTagId))
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error applying filters: {ex.Message}");
+            filteredTransactions = new List<TransactionModel>();
+        }
     }
 
-
-
+    public void Dispose()
+    {
+        searchTimer?.Dispose();
+    }
 }

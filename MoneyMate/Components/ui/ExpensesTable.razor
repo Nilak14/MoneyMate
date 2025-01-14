@@ -2,6 +2,10 @@
 @using MoneyMate.Models
 @using System.Linq
 @using System.Text.Json
+@inject GlobalState GlobalState
+
+<p>Total Expenses: <FormatNumber amount=@totalExpenses /></p>
+<p>Total Balance: <FormatNumber amount=@totalBalance /></p>
 
 <div class="mb-4 flex w-full items-center justify-between gap-20">
     <!-- Search Input -->
@@ -68,7 +72,8 @@
     private List<TransactionModel> allTransaction;
     private List<TagsModel> allTags = new List<TagsModel>();
     private List<TransactionModel> filteredTransactions;
-
+    private decimal totalExpenses = 0;
+    private decimal totalBalance = 0;
     private string searchTerm = string.Empty;
     private string selectedTagId = string.Empty;
     private DateTime?[] selectedDateRange = new DateTime?[2];
@@ -77,15 +82,22 @@
     {
         allTransaction = TransactionHelper.GetAllTransactions();
         allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Expense).ToList();
+        totalExpenses = allTransaction.Sum(t => t.amount);
+        GlobalState.setGlobalTotalExpenses(totalExpenses);
         filteredTransactions = allTransaction;
         allTags = await TagsHelper.InitializeOrGetTags();
+        totalBalance = GetAllAmount.GetTotalBalance();
+
     }
     public void RefreshTransactions()
     {
         allTransaction = TransactionHelper.GetAllTransactions();
         allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Expense).ToList();
         filteredTransactions = allTransaction;
-
+        filteredTransactions = allTransaction;
+        totalExpenses = allTransaction.Sum(t => t.amount);
+        GlobalState.setGlobalTotalExpenses(totalExpenses);
+        totalBalance = GetAllAmount.GetTotalBalance();
         StateHasChanged();
     }
     private void onChange(string value)

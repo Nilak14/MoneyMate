@@ -2,14 +2,15 @@
 @using System.Text.Json;
 @using MoneyMate.Models;
 @using MoneyMate.Helpers;
+
 @inject IMessageService _message
 
 <div class="w-full space-y-6 self-start">
     <Form Model="@ExpensesTransaction"
-          OnFinish="OnFinish"
-          OnFinishFailed="OnFinishFailed"
-          LabelColSpan="8"
-          WrapperColSpan="16">
+    OnFinish="OnFinish"
+    OnFinishFailed="OnFinishFailed"
+    LabelColSpan="8"
+    WrapperColSpan="16">
 
         <div class="space-y-4">
             <!-- Title Input -->
@@ -49,13 +50,19 @@
                 <Button  Loading="@IsLoading" Color="Color.Green8" Type="primary" Class="w-full" HtmlType="submit">
                     Add Expenses
                 </Button>
-                
+
             </FormItem>
         </div>
     </Form>
 </div>
 
-
+<Modal Title="Are You Sure ?" OkText="@("Add")"
+Centered="true"
+@bind-Visible="modalVisible"
+OnOk="HandleAddExpenses"
+OnCancel="HandleCancel">
+    <p>After this transaction your balance will be get into minus? Are you ok with that?</p>
+</Modal>
 @code {
     [Parameter]
     public bool isModalOpened { get; set; }
@@ -63,11 +70,13 @@
     public EventCallback OnExpenseAdded { get; set; }
 
     private bool IsLoading = false;
-
+    private bool modalVisible = false;
     private List<TagsModel> tags = new List<TagsModel>();
+    private decimal totalBalance = GetAllAmount.GetTotalBalance();
 
     protected override async Task OnInitializedAsync()
     {
+        totalBalance = GetAllAmount.GetTotalBalance();
         tags = await TagsHelper.InitializeOrGetTags();
     }
 
@@ -79,7 +88,7 @@
             transactionType = TransactionType.Expense
         };
 
-  
+
 
     private async Task OnFinish(EditContext editContext)
     {
@@ -89,12 +98,14 @@
             return;
         }
 
-        if (ExpensesTransaction.amount <= 0)
+        var potentialNewBalance = totalBalance - ExpensesTransaction.amount;
+        if (potentialNewBalance < 0)
         {
-            await _message.Error("Amount should be greater than 0");
+            ShowModal();
             return;
         }
       
+
         try
         {
         
@@ -135,4 +146,30 @@
                 transactionType = TransactionType.Expense
             };
     }
+
+
+
+
+    private void ShowModal()
+    {
+        modalVisible = true;
+    }
+
+    private async Task HandleAddExpenses()
+    {
+        await Task.Delay(500);
+        IsLoading = true;
+        await TransactionHelper.AddTransaction(ExpensesTransaction);
+        await OnExpenseAdded.InvokeAsync();
+        await _message.Success($"{ExpensesTransaction.title} is added");
+        ResetForm();
+        modalVisible = false;
+
+    }
+
+    private void HandleCancel()
+    {
+        modalVisible = false;
+    }
+
 }

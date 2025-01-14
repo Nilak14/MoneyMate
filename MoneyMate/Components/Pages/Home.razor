@@ -6,9 +6,10 @@
 @using Title = AntDesign.Charts.Title
 
 <div class="grid-cols-1 mb-10 grid w-full gap-8 md:grid-cols-2 lg:grid-cols-3">
-    <DashboardCard TransactionType="@TransactionType.Income" content="Total Income" />
-    <DashboardCard TransactionType="@TransactionType.Expense" content="Total Expenses" />
-    <DashboardCard TransactionType="@TransactionType.Debt" content="Total Debt" />
+    <DashboardCard  content="Total Balance" isBalance=true/>
+    <DashboardCard TransactionType="@TransactionType.Income" content="Total Income" isBalance=false />
+    <DashboardCard TransactionType="@TransactionType.Expense" content="Total Expenses" isBalance=false />
+    <DashboardCard TransactionType="@TransactionType.Debt" content="Total Debt" isBalance=false />
 </div>
 
 <div class="container mx-auto flex flex-wrap gap-5">

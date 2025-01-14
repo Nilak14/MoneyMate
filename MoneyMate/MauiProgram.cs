@@ -16,6 +16,7 @@ namespace MoneyMate
 
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddAntDesign();
+            builder.Services.AddSingleton<GlobalState>();
            
 
 #if DEBUG

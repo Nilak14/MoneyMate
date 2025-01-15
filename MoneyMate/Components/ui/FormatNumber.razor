@@ -1,17 +1,33 @@
-﻿
-
-
-
-    <span>$</span>
-    <span>
-        @amount
-    </span>
-
-
-
+﻿@using MoneyMate.Helpers
+@using MoneyMate.Models
+<span>@currencyIcon</span>
+<span>
+    @amount
+</span>
 
 @code{
-     [Parameter]
-     public decimal amount { get;set; }
+    [Parameter]
+    public decimal amount { get;set; }
 
+    private string currencyIcon = string.Empty;
+
+    private UserModel authUser = UserHelper.getSession();
+    protected override void OnInitialized()
+    {
+        authUser = UserHelper.getSession();
+        if (authUser.currencyType == UserCurrencyType.Dollor)
+        {
+            currencyIcon = "$";
+        }
+        else if (authUser.currencyType == UserCurrencyType.Pound)
+        {
+            currencyIcon = "£";
+        }else if (authUser.currencyType == UserCurrencyType.NPR)
+        {
+            currencyIcon = "Rs.";
+        }else if (authUser.currencyType == UserCurrencyType.Euro)
+        {
+            currencyIcon = "€";
+        }
+    }
 }

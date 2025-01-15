@@ -1,8 +1,16 @@
 ﻿@page "/login"
+@using MoneyMate.Models
+@using MoneyMate.Helpers
+@using MoneyMate.Components.ui
 
 <div class="flex min-h-screen items-center justify-center bg-gray-200">
     <form @onsubmit="HandleLogin" class="w-96 rounded bg-white p-6 shadow">
-        <h1 class="mb-4 text-2xl font-bold">Login</h1>
+
+        <div class="mb-4 flex justify-center">
+            <Logo />
+        </div>
+       
+        <h1 class="mb-4 text-2xl font-bold">@FormTitle</h1>
         @if (!string.IsNullOrEmpty(ErrorMessage))
         {
             <p class="mb-4 text-sm text-red-500">@ErrorMessage</p>
@@ -23,20 +31,25 @@
                 </Prefix>
             </InputPassword>
         </div>
-        <div class="mb-6">
-            <label class="mb-1 block text-sm font-medium text-gray-700">Currency Type</label>
-            <Select @bind-Value="@SelectedCurrency" OnChange="OnCurrencyChanged" TItem="string" TItemValue="string">
-                <SelectOptions>
-                    <SelectOption TItem="string" TItemValue="string" Value="@("npr")" Label="NPR" />
-                    <SelectOption TItem="string" TItemValue="string" Value="@("dollor")" Label="Dollar" />
-                    <SelectOption TItem="string" TItemValue="string" Value="@("euro")" Label="Euro" />
-                </SelectOptions>
-            </Select>
-        </div>
+        @if (authUser.currencyType == null)
+        {
+            <div class="mb-6">
+                <label class="mb-1 block text-sm font-medium text-gray-700">Currency Type</label>
+                <Select @bind-Value="@SelectedCurrency" OnChange="OnCurrencyChanged" TItem="UserCurrencyType" TItemValue="UserCurrencyType">
+                    <SelectOptions>
+                        @foreach (UserCurrencyType currency in Enum.GetValues(typeof(UserCurrencyType)))
+                        {
+                            <SelectOption TItem="UserCurrencyType" TItemValue="UserCurrencyType"
+                                          Value="@currency"
+                                          Label="@currency.ToString()" />
+                        }
+                    </SelectOptions>
+                </Select>
+            </div>
+        }
         <button type="submit" class="w-full rounded bg-green-700 py-2 text-white hover:bg-green-600">
-            Login
+            @ButtonLabel
         </button>
-       
     </form>
 </div>
 
@@ -45,31 +58,55 @@
     public bool isAuthenticated { get; set; }
     [Parameter]
     public EventCallback<bool> IsAuthenticatedChanged { get; set; }
-
+    public UserModel authUser = UserHelper.getSession();
     private string Username = "";
     private string Password = "";
     private string ErrorMessage = "";
-    private string SelectedCurrency = "npr";
+    private UserCurrencyType SelectedCurrency = UserCurrencyType.NPR;
+    private string FormTitle = "Register";
+    private string ButtonLabel = "Register Now";
 
-    private void OnCurrencyChanged(string curr)
+    private void OnCurrencyChanged(UserCurrencyType curr)
     {
-        Console.WriteLine("Currency Changed");
         SelectedCurrency = curr;
-        Console.WriteLine(SelectedCurrency);
-        Console.WriteLine(curr);
+    }
+
+    protected override void OnInitialized()
+    {
+        if (authUser != null && authUser.currencyType.HasValue)
+        {
+            FormTitle = "Login";
+            ButtonLabel = "Login";
+        }
     }
 
     private async Task HandleLogin()
     {
-        if (Username == "nilak" && Password == "nilak123")
+        if (authUser == null || !authUser.currencyType.HasValue)
         {
-            ErrorMessage = "";
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+            {
+                ErrorMessage = "Username and Password are required.";
+                return;
+            }
+            authUser = new UserModel { username = Username, currencyType = SelectedCurrency, password = Password };
+            UserHelper.RegisterUser(authUser);
+            ErrorMessage = "Registration sucmake tcessful!";
             isAuthenticated = true;
             await IsAuthenticatedChanged.InvokeAsync(true);
         }
         else
         {
-            ErrorMessage = "Invalid Credentials";
+            if (Username == authUser.username && Password == authUser.password)
+            {
+                ErrorMessage = "";
+                isAuthenticated = true;
+                await IsAuthenticatedChanged.InvokeAsync(true);
+            }
+            else
+            {
+                ErrorMessage = "Invalid Credentials";
+            }
         }
     }
 }

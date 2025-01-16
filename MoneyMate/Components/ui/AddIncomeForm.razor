@@ -39,12 +39,12 @@
             </FormItem>
 
             <!-- Tag Dropdown -->
-            <FormItem Label="Category" Class="mb-4">
+            <FormItem Label="Tag" Class="mb-4">
                 <Select required
                         @bind-Value="@IncomeTransaction.transactionTagId"
                         TItem="string"
                         TItemValue="string"
-                        Placeholder="Select a category"
+                        Placeholder="Select a Tag"
                         Class="rounded-lg border-green-200 transition-all focus:border-green-500 focus:ring focus:ring-green-200">
                     <SelectOptions>
                         @foreach (var tag in tags)

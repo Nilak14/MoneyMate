@@ -1,0 +1,19 @@
+﻿@using MoneyMate.Models
+@using MoneyMate.Helpers
+
+<Card Class="!w-full !max-w-full !rounded-lg !shadow-lg">
+    <h2 class="text-xl font-bold md:text-2xl"><FormatNumber amount="@total"/></h2>
+    <p class="text-base font-semibold">@content</p>
+</Card>
+
+@code {
+
+    [Parameter]
+    public required string content { get; set; }  
+    [Parameter]
+    public required decimal total { get; set; }
+
+
+   
+
+}

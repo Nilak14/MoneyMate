@@ -1,0 +1,187 @@
+﻿
+@using MoneyMate.Models
+@using MoneyMate.Helpers
+
+
+<Card Class="mx-auto max-w-7xl !rounded-lg bg-white p-8 !shadow-lg">
+    <div class="space-y-6">
+        <!-- Header Section -->
+        <div class="flex items-center justify-between border-b border-gray-200 pb-6">
+            <div>
+                <h3 class="mb-2 text-3xl font-bold text-gray-800">Your Tags</h3>
+                <p class="text-gray-600">Organize your finances with custom tags</p>
+            </div>
+            <button @onclick="() => ShowTagModal()" 
+            class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transform hover:scale-105 transition-all duration-200 flex items-center gap-2 shadow-md">
+                <span class="text-xl">+</span>
+                <span class="font-semibold">Create Tag</span>
+            </button>
+        </div>
+
+        <!-- Tags Grid -->
+        @if (allTags != null && allTags.Any() && allTags.Count > 1)
+        {
+            <div class="grid-cols-1 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                @foreach (var tag in allTags)
+                {
+                    @if(tag.tagId == "1")
+                    {
+                        continue;
+                    }
+
+                        <div class="group relative overflow-hidden rounded-xl border border-green-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md">
+                            <div class="absolute right-3 top-3 space-x-2">
+                                <button @onclick="() => ShowTagModal(tag)" 
+                                        class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 rounded-full bg-green-100 hover:bg-green-200 text-green-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                <button @onclick="() => DeleteTag(tag)" 
+                                        class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <div class="mb-3 flex items-center gap-2">
+                                    <div class="h-3 w-3 rounded-full bg-green-500"></div>
+                                    <h4 class="text-lg font-semibold text-gray-800">@tag.tagName</h4>
+                                </div>
+                                <p class="line-clamp-2 text-sm text-gray-600">@(tag.tagDescription ?? "No description provided")</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="rounded-xl bg-green-50 py-12 text-center">
+                    <div class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                    </div>
+                    <p class="mb-2 text-xl font-semibold text-gray-700">No tags yet</p>
+                    <p class="text-gray-500">Create your first tag to start organizing your finances</p>
+                </div>
+            }
+        </div>
+    </Card>
+
+    @if (showModal)
+    {
+    <div class="z-[9999999] fixed inset-0 -top-10 flex items-center justify-center bg-black bg-opacity-50 p-4">
+            <div class="w-full max-w-md rounded-xl bg-white p-6">
+                <h3 class="mb-4 text-xl font-semibold">@(currentTag == null ? "Create New Tag" : "Edit Tag")</h3>
+                <EditForm Model="@editModel" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="space-y-4">
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-gray-700">Tag Name</label>
+                            <InputText @bind-Value="editModel.tagName" 
+                                     class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+                            <ValidationMessage For="@(() => editModel.tagName)" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-gray-700">Description</label>
+                            <InputTextArea @bind-Value="editModel.tagDescription" 
+                                         class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                         rows="3" />
+                            <ValidationMessage For="@(() => editModel.tagDescription)" />
+                        </div>
+                        <div class="mt-6 flex justify-end gap-3">
+                            <button type="button" @onclick="CloseModal" 
+                                    class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                                Cancel
+                            </button>
+                            <button type="submit" 
+                                    class="rounded-lg bg-green-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-green-700">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+
+@code {
+    private List<TagsModel> allTags;
+    private bool showModal;
+    private TagsModel currentTag;
+    private TagsModel editModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTags();
+    }
+
+    private async Task LoadTags()
+    {
+        allTags = await TagsHelper.InitializeOrGetTags();
+        StateHasChanged();
+    }
+
+    private void ShowTagModal(TagsModel tag = null)
+    {
+        currentTag = tag;
+        editModel = new TagsModel
+        {
+            tagId = tag?.tagId ?? Guid.NewGuid().ToString(),
+            tagName = tag?.tagName ?? "",
+            tagDescription = tag?.tagDescription ?? ""
+        };
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        currentTag = null;
+        editModel = new();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (currentTag == null)
+        {
+            // Add new tag
+            await TagsHelper.AddTag(editModel);
+        }
+        else
+        {
+            // Update existing tag
+            var tags = await TagsHelper.InitializeOrGetTags();
+            var existingTag = tags.FirstOrDefault(t => t.tagId == currentTag.tagId);
+            if (existingTag.tagId == "1") // Prevent edit of the "Self" tag
+            {
+                return;
+            }
+            if (existingTag != null)
+            {
+                existingTag.tagName = editModel.tagName;
+                existingTag.tagDescription = editModel.tagDescription;
+                await TagsHelper.SaveTags(tags);
+            }
+        }
+
+        await LoadTags();
+        CloseModal();
+    }
+
+    private async Task DeleteTag(TagsModel tag)
+    {
+        if (tag.tagId == "1") // Prevent deletion of the "Self" tag
+        {
+            return;
+        }
+
+        var tags = await TagsHelper.InitializeOrGetTags();
+        tags.RemoveAll(t => t.tagId == tag.tagId);
+        await TagsHelper.SaveTags(tags);
+        await LoadTags();
+    }
+}

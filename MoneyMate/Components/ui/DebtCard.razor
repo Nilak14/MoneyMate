@@ -1,0 +1,42 @@
+﻿@using MoneyMate.Models
+@using MoneyMate.Helpers
+@using MoneyMate.Components.ui
+@inject GlobalState GlobalState
+
+<Card Class="!rounded-lg !shadow-lg">
+    <div class="space-y-2">
+        <h2 class="text-xl font-bold md:text-2xl"><FormatNumber amount="@total" /></h2>
+        <p class="text-base font-semibold">@content</p>
+        <p class="text-sm text-gray-600">Total @debtStatus Debt Transactions: @transactionCount</p>
+    </div>
+</Card>
+
+
+@code {
+    [Parameter]
+    public required DebtStatus debtStatus { get; set; }
+
+    [Parameter]
+    public required string content { get; set; }
+    private List<TransactionModel> allTransaction;
+    private int transactionCount;
+    private decimal total;
+    protected override void OnInitialized()
+    {
+        allTransaction = TransactionHelper.GetAllTransactions();
+        if (debtStatus == DebtStatus.Cleared)
+        {
+            total = GetAllAmount.GetTotalClearedDebt();
+            transactionCount = GetTransactionCount(DebtStatus.Cleared);
+        }
+        else if (debtStatus == DebtStatus.Pending)
+        {
+            total = GetAllAmount.GetTotalPendingDebt();   
+            transactionCount = GetTransactionCount(DebtStatus.Pending);
+        }
+    }
+    private int GetTransactionCount(DebtStatus status)
+    {
+        return allTransaction.Count(t => t.transactionType == TransactionType.Debt && t.debtStatus == status);
+    }
+}

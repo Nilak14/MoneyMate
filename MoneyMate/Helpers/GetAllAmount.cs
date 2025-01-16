@@ -34,13 +34,28 @@ namespace MoneyMate.Helpers
                 .Sum(t => t.amount);
         }
 
+        public static decimal GetTotalPendingDebt()
+        {
+            var transactions = TransactionHelper.GetAllTransactions();
+            return transactions
+                .Where(t => t.transactionType == TransactionType.Debt && t.debtStatus != DebtStatus.Cleared)
+                .Sum(t => t.amount);
+        }
+
+        public static decimal GetTotalClearedDebt()
+        {
+            var transactions = TransactionHelper.GetAllTransactions();
+            return transactions
+                .Where(t => t.transactionType == TransactionType.Debt && t.debtStatus != DebtStatus.Pending)
+                .Sum(t => t.amount);
+        }
         public static decimal GetTotalBalance()
         {
             var totalIncome = GetTotalIncome();
             var totalExpenses = GetTotalExpenses();
-            var totalDebt = GetTotalDebt();
+            var totalPendingDebt = GetTotalPendingDebt();
 
-            return totalIncome + totalDebt - totalExpenses;
+            return totalIncome + totalPendingDebt - totalExpenses;
         }
     }
 }

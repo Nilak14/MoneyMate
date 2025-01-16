@@ -1,0 +1,285 @@
+﻿@using MoneyMate.Models
+@using MoneyMate.Helpers
+@using MoneyMate.Components.ui
+
+<Card Class="!mt-10 !rounded-lg !shadow-lg">
+    <div class="p-6">
+        <h2 class="mb-8 text-center text-2xl font-bold text-gray-800">Transaction Highlights</h2>
+
+        <!-- Income Section -->
+        <div class="mb-10">
+            <h3 class="mb-6 border-b border-emerald-200 pb-2 text-xl font-semibold text-emerald-700">Income Transactions</h3>
+
+            <div class="space-y-6">
+                <!-- Highest Income -->
+                <div>
+                    <h4 class="mb-3 flex items-center text-lg font-medium text-emerald-600">
+                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                        Highest Income Transactions
+                    </h4>
+                    <div class="space-y-2">
+                        @{
+                            var topIncome = GetTopTransactions(TransactionType.Income);
+                            @if (topIncome.Any())
+                            {
+                                @foreach (var transaction in topIncome)
+                                {
+                                    <div class="flex items-center justify-between rounded-lg border border-emerald-100 bg-emerald-50 p-4 transition-shadow hover:shadow-md">
+                                        <div>
+                                            <span class="font-semibold text-emerald-800">@transaction.title</span>
+                                            <p class="text-sm text-emerald-600">@transaction.transactionDate!.Value.ToShortDateString()</p>
+                                        </div>
+                                        <span class="text-lg font-bold text-emerald-600">
+                                            <FormatNumber amount="@transaction.amount" />
+                                        </span>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <Empty>
+                                    <DescriptionTemplate>
+                                        <span>No Transaction Found</span>
+                                    </DescriptionTemplate>
+                                </Empty>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Lowest Income -->
+                <div>
+                    <h4 class="mb-3 flex items-center text-lg font-medium text-emerald-600">
+                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                        Lowest Income Transactions
+                    </h4>
+                    <div class="space-y-2">
+                        @{
+                            var bottomIncome = GetBottomTransactions(TransactionType.Income);
+                            @if (bottomIncome.Any())
+                            {
+                                @foreach (var transaction in bottomIncome)
+                                {
+                                    <div class="bg-emerald-50/50 flex items-center justify-between rounded-lg border border-emerald-100 p-4 transition-shadow hover:shadow-md">
+                                        <div>
+                                            <span class="font-semibold text-emerald-800">@transaction.title</span>
+                                            <p class="text-sm text-emerald-600">@transaction.transactionDate!.Value.ToShortDateString()</p>
+                                        </div>
+                                        <span class="text-lg font-bold text-emerald-600">
+                                            <FormatNumber amount="@transaction.amount" />
+                                        </span>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <Empty>
+                                    <DescriptionTemplate>
+                                        <span>No Transaction Found</span>
+                                    </DescriptionTemplate>
+                                </Empty>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expenses Section -->
+        <div class="mb-10">
+            <h3 class="mb-6 border-b border-rose-200 pb-2 text-xl font-semibold text-rose-700">Expense Transactions</h3>
+
+            <div class="space-y-6">
+                <!-- Highest Expenses -->
+                <div>
+                    <h4 class="mb-3 flex items-center text-lg font-medium text-rose-600">
+                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                        Highest Expense Transactions
+                    </h4>
+                    <div class="space-y-2">
+                        @{
+                            var topExpenses = GetTopTransactions(TransactionType.Expense);
+                            @if (topExpenses.Any())
+                            {
+                                @foreach (var transaction in topExpenses)
+                                {
+                                    <div class="flex items-center justify-between rounded-lg border border-rose-100 bg-rose-50 p-4 transition-shadow hover:shadow-md">
+                                        <div>
+                                            <span class="font-semibold text-rose-800">@transaction.title</span>
+                                            <p class="text-sm text-rose-600">@transaction.transactionDate!.Value.ToShortDateString()</p>
+                                        </div>
+                                        <span class="text-lg font-bold text-rose-600">
+                                            <FormatNumber amount="@transaction.amount" />
+                                        </span>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <Empty>
+                                    <DescriptionTemplate>
+                                        <span>No Transaction Found</span>
+                                    </DescriptionTemplate>
+                                </Empty>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Lowest Expenses -->
+                <div>
+                    <h4 class="mb-3 flex items-center text-lg font-medium text-rose-600">
+                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                        Lowest Expense Transactions
+                    </h4>
+                    <div class="space-y-2">
+                        @{
+                            var bottomExpenses = GetBottomTransactions(TransactionType.Expense);
+                            @if (bottomExpenses.Any())
+                            {
+                                @foreach (var transaction in bottomExpenses)
+                                {
+                                    <div class="bg-rose-50/50 flex items-center justify-between rounded-lg border border-rose-100 p-4 transition-shadow hover:shadow-md">
+                                        <div>
+                                            <span class="font-semibold text-rose-800">@transaction.title</span>
+                                            <p class="text-sm text-rose-600">@transaction.transactionDate!.Value.ToShortDateString()</p>
+                                        </div>
+                                        <span class="text-lg font-bold text-rose-600">
+                                            <FormatNumber amount="@transaction.amount" />
+                                        </span>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <Empty>
+                                    <DescriptionTemplate>
+                                        <span>No Transaction Found</span>
+                                    </DescriptionTemplate>
+                                </Empty>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debts Section -->
+        <div>
+            <h3 class="mb-6 border-b border-blue-200 pb-2 text-xl font-semibold text-blue-700">Debt Transactions</h3>
+
+            <div class="space-y-6">
+                <!-- Highest Debts -->
+                <div>
+                    <h4 class="mb-3 flex items-center text-lg font-medium text-blue-600">
+                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                        Highest Debt Transactions
+                    </h4>
+                    <div class="space-y-2">
+                        @{
+                            var topDebts = GetTopTransactions(TransactionType.Debt);
+                            @if (topDebts.Any())
+                            {
+                                @foreach (var transaction in topDebts)
+                                {
+                                    <div class="flex items-center justify-between rounded-lg border border-blue-100 bg-blue-50 p-4 transition-shadow hover:shadow-md">
+                                        <div>
+                                            <span class="font-semibold text-blue-800">@transaction.title</span>
+                                            <p class="text-sm text-blue-600">@transaction.transactionDate!.Value.ToShortDateString()</p>
+                                        </div>
+                                        <span class="text-lg font-bold text-blue-600">
+                                            <FormatNumber amount="@transaction.amount" />
+                                        </span>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <Empty>
+                                    <DescriptionTemplate>
+                                        <span>No Transaction Found</span>
+                                    </DescriptionTemplate>
+                                </Empty>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Lowest Debts -->
+                <div>
+                    <h4 class="mb-3 flex items-center text-lg font-medium text-blue-600">
+                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                        Lowest Debt Transactions
+                    </h4>
+                    <div class="space-y-2">
+                        @{
+                            var bottomDebts = GetBottomTransactions(TransactionType.Debt);
+                            @if (bottomDebts.Any())
+                            {
+                                @foreach (var transaction in bottomDebts)
+                                {
+                                    <div class="bg-blue-50/50 flex items-center justify-between rounded-lg border border-blue-100 p-4 transition-shadow hover:shadow-md">
+                                        <div>
+                                            <span class="font-semibold text-blue-800">@transaction.title</span>
+                                            <p class="text-sm text-blue-600">@transaction.transactionDate!.Value.ToShortDateString()</p>
+                                        </div>
+                                        <span class="text-lg font-bold text-blue-600">
+                                            <FormatNumber amount="@transaction.amount" />
+                                        </span>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <Empty>
+                                    <DescriptionTemplate>
+                                        <span>No Transaction Found</span>
+                                    </DescriptionTemplate>
+                                </Empty>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</Card>
+
+@code {
+    private List<TransactionModel> allTransactions;
+
+    protected override void OnInitialized()
+    {
+        allTransactions = TransactionHelper.GetAllTransactions();
+    }
+
+    private List<TransactionModel> GetTopTransactions(TransactionType type)
+    {
+        return allTransactions
+            .Where(t => t.transactionType == type)
+            .OrderByDescending(t => t.amount)
+            .Take(3)
+            .ToList();
+    }
+
+    private List<TransactionModel> GetBottomTransactions(TransactionType type)
+    {
+        return allTransactions
+            .Where(t => t.transactionType == type)
+            .OrderBy(t => t.amount)
+            .Take(3)
+            .ToList();
+    }
+}

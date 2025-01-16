@@ -10,6 +10,8 @@
     <DashboardCard TransactionType="@TransactionType.Income" content="Total Income" isBalance=false />
     <DashboardCard TransactionType="@TransactionType.Expense" content="Total Expenses" isBalance=false />
     <DashboardCard TransactionType="@TransactionType.Debt" content="Total Debt" isBalance=false />
+    <DebtCard debtStatus="@DebtStatus.Pending" content="Pending Debt" />
+    <DebtCard debtStatus="@DebtStatus.Cleared" content="Cleared Debt" />
 </div>
 
 <div class="container mx-auto flex flex-wrap gap-5">
@@ -39,6 +41,9 @@
     </div>
 </div>
 
+<PendingDebtTable/>
+
+<HiLowCard/>
 @code {
     private List<TransactionModel> allTransactions;
 
@@ -132,17 +137,16 @@
 
     private void PrepareMonthlyData()
     {
-        var currentMonth = DateTime.Now.Month;
-
+        var currentDate = DateTime.Now;
         var monthlyTotals = allTransactions
-            .Where(t => t.transactionDate?.Month == currentMonth)
+            .Where(t => t.transactionDate?.Month == currentDate.Month &&
+                        t.transactionDate?.Year == currentDate.Year)
             .GroupBy(t => t.transactionType)
             .Select(g => new
             {
                 type = g.Key.ToString(),
                 value = g.Sum(t => t.amount)
             });
-
         monthlyPieData = monthlyTotals.ToArray();
     }
 }

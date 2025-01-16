@@ -3,19 +3,9 @@
 @using System.Linq
 @using System.Text.Json
 @inject IMessageService _message
-<div class="mb-10 flex flex-row flex-wrap justify-between gap-10 sm:flex-col sm:items-stretch md:justify-start md:flex-row md:gap-10">
 
-    <!-- Total Debt Card Display -->
-    <div class="flex-1 sm:w-full">
-        <AmountCard content="Total Debt" total="@totalDebt" />
-    </div>
-
-    <!-- Total Balance Card Display -->
-    <div class="flex-1 sm:w-full">
-        <AmountCard content="Total Balance" total="@totalBalance" />
-    </div>
-</div>
-
+<Card Class="!mt-10 !rounded-lg !shadow-lg">
+<h3 class="text-center text-xl font-bold">Pending Debts</h3
 <div class="mb-6 flex flex-col gap-4 rounded-lg bg-gray-100 p-4 shadow-lg">
     <div class="flex flex-wrap items-center justify-between gap-4">
         <!-- Filter By Title Input -->
@@ -36,24 +26,13 @@
                 @bind-Value="selectedTagId">
             <SelectOptions>
                 @foreach (var tag in allTags)
-                {
-                    <SelectOption TItem="string" TItemValue="string" Value="@tag.tagId" Label="@tag.tagName" />
-                }
+                    {
+                            <SelectOption TItem="string" TItemValue="string" Value="@tag.tagId" Label="@tag.tagName" />
+                    }
             </SelectOptions>
         </Select>
 
-        <!-- Status Filter -->
-        <Select OnSelectedItemChanged="ApplyFilters"
-                Class="!w-[200px] !max-w-[200px]"
-                Placeholder="Filter By Debt Status"
-                TItem="DebtStatus?"
-                TItemValue="DebtStatus?"
-                @bind-Value="selectedStatus">
-            <SelectOptions>
-                <SelectOption TItem="DebtStatus?" TItemValue="DebtStatus?" Value="@DebtStatus.Pending" Label="Pending" />
-                <SelectOption TItem="DebtStatus?" TItemValue="DebtStatus?" Value="@DebtStatus.Cleared" Label="Cleared" />
-            </SelectOptions>
-        </Select>
+        
     </div>
 
     <div class="flex flex-wrap items-center justify-between gap-4">
@@ -85,87 +64,89 @@
             </tr>
         </thead>
         <tbody class="bg-green-400 text-center font-semibold text-black">
-            @if (filteredTransactions.Count > 0)
-            {
-                @foreach (var transaction in filteredTransactions)
+                @if (filteredTransactions.Count > 0)
                 {
-                    var tag = allTags.FirstOrDefault(t => t.tagId == transaction.transactionTagId);
-                    <tr class="border-b border-b-white last:border-none">
-                        <td class="px-4 py-2">@transaction.title</td>
-                        <td class="px-4 py-2">@transaction.amount</td>
-                        <td class="px-4 py-2">@transaction.debtSource</td>
-                        <td class="px-4 py-2">@transaction.transactionDate?.ToShortDateString()</td>
-                        <td class="px-4 py-2">
-                            @if (transaction.debtDueDate.HasValue)
-                            {
-                                @transaction.debtDueDate.Value.ToShortDateString()
-                            }
-                            else
-                            {
-                                <i class="bi bi-infinity" style="font-size: 1.5rem; font-weight: bold;"></i>
-                            }
-                        </td>
+                    @foreach (var transaction in filteredTransactions)
+                    {
+                        var tag = allTags.FirstOrDefault(t => t.tagId == transaction.transactionTagId);
+                                    <tr class="border-b border-b-white last:border-none">
+                                        <td class="px-4 py-2">@transaction.title</td>
+                                        <td class="px-4 py-2">@transaction.amount</td>
+                                        <td class="px-4 py-2">@transaction.debtSource</td>
+                                        <td class="px-4 py-2">@transaction.transactionDate?.ToShortDateString()</td>
+                                        <td class="px-4 py-2">
+                                @if (transaction.debtDueDate.HasValue)
+                                {
+                                    @transaction.debtDueDate.Value.ToShortDateString()
+                                }
+                                else
+                                {
+                                                        <i class="bi bi-infinity" style="font-size: 1.5rem; font-weight: bold;"></i>
+                                }
+                                        </td>
 
-                        <td class="flex items-center justify-center px-4 py-2 text-center">
-                            @if (!string.IsNullOrWhiteSpace(@tag?.tagName))
-                            {
-                                <p class="w-fit rounded-xl bg-green-700 px-4 py-2 text-center text-white">
-                                    @tag?.tagName
-                                </p>
-                            }
-                            else
-                            {
-                                <p class="w-fit rounded-xl bg-green-700 px-4 py-2 text-center text-white">
-                                    N/A
-                                </p>
-                            }
-                        </td>
-                        <td class="px-4 py-2">@transaction.debtStatus</td>
-                        <td class="relative px-4 py-2">
-                            <Dropdown Trigger="new[] { Trigger.Click }">
-                                <Overlay>
-                                    <Menu>
-                                        <MenuItem OnClick="() => HandleView(transaction)">
-                                            <Icon Type="eye" Class="mr-2" /> View
-                                        </MenuItem>
-                                        @if (transaction.debtStatus != DebtStatus.Cleared)
-                                        {
-                                            <MenuItem OnClick="() => HandleDebtClear(transaction)">
-                                                <Icon Type="check-circle" Class="mr-2" /> Clear Debt
-                                            </MenuItem>
-                                        }
-                                        <MenuItem OnClick="() => HandleDelete(transaction)">
-                                            <Icon Type="delete" Class="mr-2" /> Delete
-                                        </MenuItem>
-                                    </Menu>
-                                </Overlay>
-                                <ChildContent>
-                                    <Button Type="@ButtonType.Link">
-                                        <Icon Type="more" Theme="Outline" Class="text-xl" />
-                                    </Button>
-                                </ChildContent>
-                            </Dropdown>
-                        </td>
+                                        <td class="flex items-center justify-center px-4 py-2 text-center">
+                                @if (!string.IsNullOrWhiteSpace(@tag?.tagName))
+                                {
+                                                        <p class="w-fit rounded-xl bg-green-700 px-4 py-2 text-center text-white">
+                                        @tag?.tagName
+                                                        </p>
+                                }
+                                else
+                                {
+                                                        <p class="w-fit rounded-xl bg-green-700 px-4 py-2 text-center text-white">
+                                                            N/A
+                                                        </p>
+                                }
+                                        </td>
+                                        <td class="px-4 py-2">@transaction.debtStatus</td>
+                                        <td class="relative px-4 py-2">
+                                            <Dropdown Trigger="new[] { Trigger.Click }">
+                                                <Overlay>
+                                                    <Menu>
+                                                        <MenuItem OnClick="() => HandleView(transaction)">
+                                                            <Icon Type="eye" Class="mr-2" /> View
+                                                        </MenuItem>
+                                            @if (transaction.debtStatus != DebtStatus.Cleared)
+                                            {
+                                                                    <MenuItem OnClick="() => HandleDebtClear(transaction)">
+                                                                        <Icon Type="check-circle" Class="mr-2" /> Clear Debt
+                                                                    </MenuItem>
+                                            }
+                                                        <MenuItem OnClick="() => HandleDelete(transaction)">
+                                                            <Icon Type="delete" Class="mr-2" /> Delete
+                                                        </MenuItem>
+                                                    </Menu>
+                                                </Overlay>
+                                                <ChildContent>
+                                                    <Button Type="@ButtonType.Link">
+                                                        <Icon Type="more" Theme="Outline" Class="text-xl" />
+                                                    </Button>
+                                                </ChildContent>
+                                            </Dropdown>
+                                        </td>
 
 
-                    </tr>
+                                    </tr>
+                    }
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="8" class="px-4 py-2 text-center">
-                        <Empty>
-                            <DescriptionTemplate>
-                                <span>No Debt Transaction Found</span>
-                            </DescriptionTemplate>
-                        </Empty>
-                    </td>
-                </tr>
-            }
+                else
+                {
+                        <tr>
+                            <td colspan="8" class="px-4 py-2 text-center">
+                                <Empty>
+                                    <DescriptionTemplate>
+                                        <span>No Pending Debt Found</span>
+                                    </DescriptionTemplate>
+                                </Empty>
+                            </td>
+                        </tr>
+                }
         </tbody>
     </table>
 </div>
+</Card>
+
  
 <!-- View Transaction Modal -->
      <Modal Centered="true"
@@ -202,8 +183,6 @@ OnCancel="HandleCancel">
     private string searchTerm = string.Empty;
     private string selectedTagId = string.Empty;
     private DateTime?[] selectedDateRange = new DateTime?[2];
-    private decimal totalDebt = 0;
-    private decimal totalBalance = 0;
     private bool isViewModalVisible = false;
     private System.Timers.Timer searchTimer = new(300); // Initialize with 300ms delay
     private TransactionModel selectedTransaction = null;
@@ -289,12 +268,9 @@ OnCancel="HandleCancel">
     protected override async Task OnInitializedAsync()
     {
         allTransaction = TransactionHelper.GetAllTransactions();
-        allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Debt).ToList();
+        allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Debt && t.debtStatus==DebtStatus.Pending).ToList();
         filteredTransactions = allTransaction;
         allTags = await TagsHelper.InitializeOrGetTags();
-        totalDebt = allTransaction.Sum(t => t.amount);
-        totalBalance = GetAllAmount.GetTotalBalance();
-
         // Initialize debounce timer
         searchTimer.Elapsed += async (sender, e) => await SearchTimerElapsed();
         searchTimer.AutoReset = false;
@@ -304,10 +280,8 @@ OnCancel="HandleCancel">
     public void RefreshTransactions()
     {
         allTransaction = TransactionHelper.GetAllTransactions();
-        allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Debt).ToList();
+        allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Debt && t.debtStatus==DebtStatus.Pending).ToList();
         filteredTransactions = allTransaction;
-        totalDebt = allTransaction.Sum(t => t.amount);
-        totalBalance = GetAllAmount.GetTotalBalance();
         StateHasChanged();
     }
 
@@ -370,7 +344,7 @@ OnCancel="HandleCancel">
             var query = allTransaction.AsQueryable();
 
             // Filter by transaction type
-            query = query.Where(t => t.transactionType == TransactionType.Debt);
+            query = query.Where(t => t.transactionType == TransactionType.Debt && t.debtStatus==DebtStatus.Pending);
 
             // Apply search term filter
             if (!string.IsNullOrEmpty(searchTerm))
@@ -382,12 +356,6 @@ OnCancel="HandleCancel">
             if (!string.IsNullOrEmpty(selectedTagId))
             {
                 query = query.Where(t => t.transactionTagId == selectedTagId);
-            }
-
-            // Apply status filter
-            if (selectedStatus.HasValue)
-            {
-                query = query.Where(t => t.debtStatus == selectedStatus.Value);
             }
 
             // Apply date range filter

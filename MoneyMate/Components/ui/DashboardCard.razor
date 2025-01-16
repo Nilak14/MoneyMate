@@ -1,23 +1,26 @@
 ﻿@using MoneyMate.Models
 @using MoneyMate.Helpers
+@using MoneyMate.Components.ui
 @inject GlobalState GlobalState
+
 <Card Class="!rounded-lg !shadow-lg">
-    <h2 class="text-xl font-bold md:text-2xl"><FormatNumber amount="@total"/></h2>
-    <p class="text-base font-semibold">@content</p>
+    <div class="space-y-2">
+        <h2 class="text-xl font-bold md:text-2xl"><FormatNumber amount="@total"/></h2>
+        <p class="text-base font-semibold">@content</p>
+        <p class="text-sm text-gray-600">Total @TransactionType Transactions: @transactionCount</p>
+    </div>
 </Card>
 
 @code {
     [Parameter]
-    public  TransactionType TransactionType { get; set; }
-
+    public TransactionType TransactionType { get; set; }
     [Parameter]
     public required string content { get; set; }
-
     [Parameter]
     public required Boolean isBalance { get; set; }
-
     private List<TransactionModel> allTransaction;
     private decimal total;
+    private int transactionCount;
 
     protected override void OnInitialized()
     {
@@ -27,26 +30,33 @@
               .Sum(t => t.amount);
         GlobalState.setGlobalTotalExpenses(expenses);
 
-        if(!isBalance){
-            total = allTransaction.Where(t => t.transactionType == TransactionType).Sum(t => t.amount);
+        if(!isBalance)
+        {
+            if(TransactionType == TransactionType.Debt)
+            {
+                total = GetAllAmount.GetTotalDebt();
+                transactionCount = GetTransactionCount(TransactionType.Debt);
+            }
+            else if(TransactionType == TransactionType.Income)
+            {
+                total = GetAllAmount.GetTotalIncome();
+                transactionCount = GetTransactionCount(TransactionType.Income);
+            }
+            else if(TransactionType == TransactionType.Expense)
+            {
+                total = GetAllAmount.GetTotalExpenses();
+                transactionCount = GetTransactionCount(TransactionType.Expense);
+            }
         }
         else
         {
-            decimal income = allTransaction
-              .Where(t => t.transactionType == TransactionType.Income)
-              .Sum(t => t.amount);
-
-          
-
-            decimal debt = allTransaction
-                .Where(t => t.transactionType == TransactionType.Debt)
-                .Sum(t => t.amount);
-
-            total = (income + debt) - expenses;
+            total = GetAllAmount.GetTotalBalance();
+            transactionCount = allTransaction.Count;
         }
-
-
     }
 
-    
+    private int GetTransactionCount(TransactionType type)
+    {
+        return allTransaction.Count(t => t.transactionType == type);
+    }
 }

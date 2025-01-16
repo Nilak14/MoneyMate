@@ -9,7 +9,7 @@
         <div class="mb-4 flex justify-center">
             <Logo />
         </div>
-       
+
         <h1 class="mb-4 text-2xl font-bold">@FormTitle</h1>
         @if (!string.IsNullOrEmpty(ErrorMessage))
         {
@@ -18,9 +18,9 @@
         <div class="mb-4">
             <label class="mb-1 block text-sm font-medium text-gray-700">Username</label>
             <Input required Type="text" Placeholder="Username" Size="InputSize.Large" @bind-Value="@Username">
-            <Prefix>
-                <Icon Type="@IconType.Outline.User" />
-            </Prefix>
+                <Prefix>
+                    <Icon Type="@IconType.Outline.User" />
+                </Prefix>
             </Input>
         </div>
         <div class="mb-6">
@@ -40,8 +40,8 @@
                         @foreach (UserCurrencyType currency in Enum.GetValues(typeof(UserCurrencyType)))
                         {
                             <SelectOption TItem="UserCurrencyType" TItemValue="UserCurrencyType"
-                                          Value="@currency"
-                                          Label="@currency.ToString()" />
+                            Value="@currency"
+                            Label="@currency.ToString()" />
                         }
                     </SelectOptions>
                 </Select>
@@ -58,7 +58,7 @@
     public bool isAuthenticated { get; set; }
     [Parameter]
     public EventCallback<bool> IsAuthenticatedChanged { get; set; }
-    public UserModel authUser = UserHelper.getSession();
+    public UserModel authUser = UserHelper.GetSession();
     private string Username = "";
     private string Password = "";
     private string ErrorMessage = "";
@@ -89,15 +89,20 @@
                 ErrorMessage = "Username and Password are required.";
                 return;
             }
+            if (Password.Length <= 6)
+            {
+                ErrorMessage = "Password must be longer than 6 characters.";
+                return;
+            }
             authUser = new UserModel { username = Username, currencyType = SelectedCurrency, password = Password };
             UserHelper.RegisterUser(authUser);
-            ErrorMessage = "Registration sucmake tcessful!";
+
             isAuthenticated = true;
             await IsAuthenticatedChanged.InvokeAsync(true);
         }
         else
         {
-            if (Username == authUser.username && Password == authUser.password)
+            if (UserHelper.ValidateLogin(Username, Password))
             {
                 ErrorMessage = "";
                 isAuthenticated = true;
@@ -107,6 +112,7 @@
             {
                 ErrorMessage = "Invalid Credentials";
             }
+        
         }
     }
 }

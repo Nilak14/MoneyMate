@@ -11,20 +11,21 @@ namespace MoneyMate.Helpers
         {
             return new List<TagsModel>
         {
-            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Food", tagDescription = "Transection Related to Food" },
-            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Transport", tagDescription = "Transection Related to Transport" },
-            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Rent", tagDescription = "Transection Related to Rents" },
-            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Utilities", tagDescription = "Electricity, water, etc." },
-            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Entertainment", tagDescription = "Movies, games, etc." },
-            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Shopping", tagDescription = "Personal shopping expenses" },
-            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Healthcare", tagDescription = "Medical and health expenses" },
-            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Education", tagDescription = "Educational expenses" },
-            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Savings", tagDescription = "Savings and investments" },
-            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Miscellaneous", tagDescription = "Other expenses" }
+            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Yearly", tagDescription = "Annual transactions that occur once a year" },
+            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Monthly", tagDescription = "Recurring transactions that occur every month," },
+            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Food", tagDescription = " Transaction related to food and dining, including groceries, dining out, or takeaways" },
+            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Drinks", tagDescription = "Transactions on beverages, including both non-alcoholic and alcoholic drinks" },
+            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Clothes", tagDescription = "Transactions related to clothing, footwear, and accessories" },
+            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Gadgets", tagDescription = " Transaction related to electronic devices, gadgets, or tech-related purchases." },
+            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Miscellaneous", tagDescription = "Transactions that don’t fit into any specific category, covering a wide range of general transactions." },
+            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Fuel", tagDescription = "Transactions on fuel for transportation, whether for a car, bike, or any other vehicle" },
+            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "EMI ", tagDescription = "Regular payments made to repay loans, credit cards, or other financed purchases" },
+            new TagsModel { tagId = Guid.NewGuid().ToString(), tagName = "Party", tagDescription = "Expenses related to parties, celebrations, or social gatherings, including food, decorations, and entertainment" },
+            new TagsModel { tagId = "1", tagName = "Self", tagDescription = "Debt taken Due to having more expenses than the total balance" }
         };
         }
 
-        private static async Task SaveTags(List<TagsModel> tags)
+        public static async Task SaveTags(List<TagsModel> tags)
         {
             var json = JsonSerializer.Serialize(tags);
             await File.WriteAllTextAsync(tagsFilePath, json);
@@ -53,6 +54,12 @@ namespace MoneyMate.Helpers
             var tags = await InitializeOrGetTags();
             tags.Add(tag);
             await SaveTags(tags);
+        }
+
+        public static async Task<TagsModel> GetTagById(string tagId)
+        {
+            var tags = await InitializeOrGetTags();
+            return tags.FirstOrDefault(tag => tag.tagId == tagId);
         }
 
     }

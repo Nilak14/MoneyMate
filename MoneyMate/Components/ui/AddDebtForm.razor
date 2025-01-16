@@ -1,59 +1,113 @@
-﻿
-@using System.ComponentModel.DataAnnotations;
+﻿@using System.ComponentModel.DataAnnotations;
 @using System.Text.Json;
 @using MoneyMate.Models;
 @using MoneyMate.Helpers;
 @inject IMessageService _message
 
-<div class="w-full space-y-6 self-start">
+<div class="bg-green-50/50 mx-auto w-full max-w-2xl rounded-xl p-6">
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-green-800">Add New Debt</h2>
+        <p class="mt-2 text-sm text-green-600">Record your debts and keep track of payment due dates</p>
+    </div>
+
     <Form Model="@DebtTransaction"
           OnFinish="OnFinish"
           OnFinishFailed="OnFinishFailed"
           LabelColSpan="8"
-          WrapperColSpan="16">
+          WrapperColSpan="16"
+          Class="space-y-6">
 
-        <div class="space-y-4">
+        <div class="space-y-6 rounded-xl border border-green-100 bg-white p-6 shadow-sm">
             <!-- Title Input -->
-            <FormItem Label="Title">
-                <Input required @bind-Value="@DebtTransaction.title"  />
+            <FormItem Label="Title" Class="mb-4">
+                <Input required
+                       @bind-Value="@DebtTransaction.title"
+                       Placeholder="e.g., Car Loan"
+                       Class="rounded-lg border-green-200 transition-all focus:border-green-500 focus:ring focus:ring-green-200" />
             </FormItem>
 
             <!-- Amount Input -->
-            <FormItem Label="Amount">
-                <Input required Type="number" @bind-Value="@DebtTransaction.amount"/>
+            <FormItem Label="Amount" Class="mb-4">
+                <div class="relative">
+                    <span class="-translate-y-1/2 absolute left-3 top-1/2 transform font-medium text-green-600">$</span>
+                    <Input required
+                           Type="number"
+                           @bind-Value="@DebtTransaction.amount"
+                           Placeholder="0.00"
+                           Class="rounded-lg border-green-200 pl-8 transition-all focus:border-green-500 focus:ring focus:ring-green-200" />
+                </div>
             </FormItem>
-            <!-- Debt Transaction Date -->
-            <!-- Date Picker -->
-            <FormItem Label="Date">
-                <DatePicker DisabledDate="@(date => date > DateTime.Today)" @bind-Value="@DebtTransaction.transactionDate" class="w-full" />
+
+            <!-- Tag Dropdown -->
+            <FormItem Label="Category" Class="mb-4">
+                <Select required
+                        @bind-Value="@DebtTransaction.transactionTagId"
+                        TItem="string"
+                        TItemValue="string"
+                        Placeholder="Select a category"
+                        Class="rounded-lg border-green-200 transition-all focus:border-green-500 focus:ring focus:ring-green-200">
+                    <SelectOptions>
+                        @foreach (var tag in tags)
+                        {
+                            <SelectOption TItem="string"
+                                          TItemValue="string"
+                                          Value="@tag.tagId"
+                                          Label="@tag.tagName" />
+                        }
+                    </SelectOptions>
+                </Select>
             </FormItem>
+
+            <!-- Transaction Date -->
+            <FormItem Label="Transaction Date" Class="mb-4">
+                <DatePicker @bind-Value="@DebtTransaction.transactionDate"
+                            Class="w-full rounded-lg border-green-200 transition-all focus:border-green-500 focus:ring focus:ring-green-200" />
+            </FormItem>
+
             <!-- Debt Due Date -->
-            <FormItem Label="Debt Due Date">
-
-                <DatePicker @bind-Value="@DebtTransaction.debtDueDate"  />
-            </FormItem>
-            <!-- Debt Soruce -->
-            <FormItem Label="Debt Source">
-                <Input required @bind-Value="@DebtTransaction.debtSource"  />
+            <FormItem Label="Due Date" Class="mb-4">
+                <DatePicker DisabledDate="@(date => date < DateTime.Today)"
+                            @bind-Value="@DebtTransaction.debtDueDate"
+                            Class="w-full rounded-lg border-green-200 transition-all focus:border-green-500 focus:ring focus:ring-green-200" />
             </FormItem>
 
+            <!-- Debt Source -->
+            <FormItem Label="Debt Source" Class="mb-4">
+                <Input required
+                       @bind-Value="@DebtTransaction.debtSource"
+                       Placeholder="e.g., Bank of America"
+                       Class="rounded-lg border-green-200 transition-all focus:border-green-500 focus:ring focus:ring-green-200" />
+            </FormItem>
 
             <!-- Note Input -->
-            <FormItem Label="Note">
-                <Input @bind-Value="@DebtTransaction.note" />
+            <FormItem Label="Note" Class="mb-4">
+                <Input @bind-Value="@DebtTransaction.note"
+                       Placeholder="Add any additional details"
+                       Class="rounded-lg border-green-200 transition-all focus:border-green-500 focus:ring focus:ring-green-200" />
             </FormItem>
 
             <!-- Submit Button -->
-            <FormItem WrapperColOffset="8" WrapperColSpan="16">
-                <Button Loading="@IsLoading" Color="Color.Green8" Type="primary" Class="w-full" HtmlType="submit">
-                    Add Debt
+            <FormItem WrapperColSpan="24" Class="mt-8">
+                <Button Loading="@IsLoading"
+                        Type="primary"
+                        Class="border-0 h-12 w-full rounded-lg bg-green-600 text-base font-semibold text-white shadow-md transition-all duration-200 hover:bg-green-700 hover:shadow-lg"
+                        HtmlType="submit">
+                    @if (IsLoading)
+                    {
+                        <div class="flex items-center justify-center space-x-2">
+                            <span class="border-2 h-5 w-5 animate-spin rounded-full border-white border-t-transparent"></span>
+                            <span>Processing...</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <span>Save Debt</span>
+                    }
                 </Button>
-
             </FormItem>
         </div>
     </Form>
 </div>
-
 
 @code {
     [Parameter]
@@ -62,7 +116,6 @@
     public EventCallback OnDebtAdded { get; set; }
 
     private bool IsLoading = false;
-
     private List<TagsModel> tags = new List<TagsModel>();
 
     protected override async Task OnInitializedAsync()
@@ -70,24 +123,16 @@
         tags = await TagsHelper.InitializeOrGetTags();
     }
 
-
     private TransactionModel DebtTransaction = new TransactionModel
         {
             transactionId = Guid.NewGuid().ToString(),
             transactionDate = DateTime.Now,
-            transactionType = TransactionType.Debt
+            transactionType = TransactionType.Debt,
+            debtStatus = DebtStatus.Pending
         };
-
-    private void onTagChanged(string transactionId)
-    {
-
-        DebtTransaction.transactionId = transactionId;
-    }
 
     private async Task OnFinish(EditContext editContext)
     {
-       
-
         if (DebtTransaction.amount <= 0)
         {
             await _message.Error("Amount should be greater than 0");
@@ -96,7 +141,6 @@
 
         try
         {
-
             IsLoading = true;
             await TransactionHelper.AddTransaction(DebtTransaction);
             await OnDebtAdded.InvokeAsync();
@@ -120,7 +164,6 @@
 
     protected override void OnParametersSet()
     {
-
         if (isModalOpened)
         {
             ResetForm();
@@ -133,7 +176,8 @@
             {
                 transactionId = Guid.NewGuid().ToString(),
                 transactionDate = DateTime.Now,
-                transactionType = TransactionType.Debt
+                transactionType = TransactionType.Debt,
+                debtStatus = DebtStatus.Pending
             };
     }
 }

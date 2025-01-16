@@ -21,19 +21,19 @@
         <!-- Filter By Title Input -->
         <div class="w-full sm:w-[50vw]">
             <Input Placeholder="Search By Title"
-                   AllowClear="false"
-                   @bind-Value="searchTerm"
-                   OnInput="HandleSearch"
-                   TValue="string" />
+            AllowClear="false"
+            @bind-Value="searchTerm"
+            OnInput="HandleSearch"
+            TValue="string" />
         </div>
 
         <!-- Filter By Tag Select Input-->
         <Select OnSelectedItemChanged="ApplyFilters"
-                Class="!w-[200px] !max-w-[200px]"
-                Placeholder="Sort By Tags"
-                TItem="string"
-                TItemValue="string"
-                @bind-Value="selectedTagId">
+        Class="!w-[200px] !max-w-[200px]"
+        Placeholder="Sort By Tags"
+        TItem="string"
+        TItemValue="string"
+        @bind-Value="selectedTagId">
             <SelectOptions>
                 @foreach (var tag in allTags)
                 {
@@ -44,11 +44,11 @@
 
         <!-- Status Filter -->
         <Select OnSelectedItemChanged="ApplyFilters"
-                Class="!w-[200px] !max-w-[200px]"
-                Placeholder="Filter By Debt Status"
-                TItem="DebtStatus?"
-                TItemValue="DebtStatus?"
-                @bind-Value="selectedStatus">
+        Class="!w-[200px] !max-w-[200px]"
+        Placeholder="Filter By Debt Status"
+        TItem="DebtStatus?"
+        TItemValue="DebtStatus?"
+        @bind-Value="selectedStatus">
             <SelectOptions>
                 <SelectOption TItem="DebtStatus?" TItemValue="DebtStatus?" Value="@DebtStatus.Pending" Label="Pending" />
                 <SelectOption TItem="DebtStatus?" TItemValue="DebtStatus?" Value="@DebtStatus.Cleared" Label="Cleared" />
@@ -59,9 +59,9 @@
     <div class="flex flex-wrap items-center justify-between gap-4">
         <!-- Date Range Picker -->
         <RangePicker TValue="DateTime?[]"
-                     Picker="DatePickerType.Date"
-                     Value="selectedDateRange"
-                     OnChange="OnDateRangeChange" />
+        Picker="DatePickerType.Date"
+        Value="selectedDateRange"
+        OnChange="OnDateRangeChange" />
 
         <!-- Clear Filters Button -->
         <button class="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600" @onclick="ClearFilters">Clear Filters</button>
@@ -75,10 +75,36 @@
         <thead class="bg-green-700">
             <tr>
                 <th class="cursor-pointer px-4 py-2">Title</th>
-                <th class="cursor-pointer px-4 py-2">Amount</th>
+                <th class="cursor-pointer px-4 py-2" @onclick='() => ToggleSort("amount")'>
+                    <div class="flex items-center justify-center gap-2">
+                        Amount
+                        @if (sortField == "amount")
+                        {
+                            <Icon Type="@(sortAscending ? "arrow-up" : "arrow-down")"
+                            Class="text-white" />
+                        }
+                        else
+                        {
+                            <Icon Type="swap" Class="text-white opacity-50" />
+                        }
+                    </div>
+                </th>
                 <th class="cursor-pointer px-4 py-2">Source</th>
-                <th class="cursor-pointer px-4 py-2">Date</th>
-                <th class="px-4 py-2">Due Date</th>
+                <th class="cursor-pointer px-4 py-2" @onclick='() => ToggleSort("date")'>
+                    <div class="flex items-center justify-center gap-2">
+                        Date
+                        @if (sortField == "date")
+                        {
+                            <Icon Type="@(sortAscending ? "arrow-up" : "arrow-down")"
+                            Class="text-white" />
+                        }
+                        else
+                        {
+                            <Icon Type="swap" Class="text-white opacity-50" />
+                        }
+                    </div>
+                </th>
+                <th class="cursor-pointer px-4 py-2">Due Date</th>
                 <th class="px-4 py-2">Tag</th>
                 <th class="px-4 py-2">Status</th>
                 <th class="px-4 py-2">Actions</th>
@@ -166,21 +192,21 @@
         </tbody>
     </table>
 </div>
- 
+
 <!-- View Transaction Modal -->
-     <Modal Centered="true"
-        Title="View Debt"
-        @bind-Visible="isViewModalVisible"
-        OnCancel="HandleCancel"
-        Footer="@ModalFooter.DefaultCancelFooter">
-           <DebtView debtTransaction="selectedTransaction" />
-      </Modal>
+<Modal Centered="true"
+Title="View Debt"
+@bind-Visible="isViewModalVisible"
+OnCancel="HandleCancel"
+Footer="@ModalFooter.DefaultCancelFooter">
+    <DebtView debtTransaction="selectedTransaction" />
+</Modal>
 
 <!-- Delete Transaction Modal -->
- <Modal Title="Delete Transaction" OkText="@("Delete")"
+<Modal Title="Delete Transaction" OkText="@("Delete")"
 Centered="true"
 @bind-Visible="isDeleteModalVisible"
-       OnOk="Delete"
+OnOk="Delete"
 OnCancel="HandleCancel">
     <p>Are You sure you want to delet this transaction? </p>
 </Modal>
@@ -188,8 +214,8 @@ OnCancel="HandleCancel">
 <!-- Clear Debt Modal -->
 <Modal Title="Clear Debt" OkText="@("Clear")"
 Centered="true"
-       @bind-Visible="isClearDebtModalVisible"
-       OnOk="ClearDebt"
+@bind-Visible="isClearDebtModalVisible"
+OnOk="ClearDebt"
 OnCancel="HandleCancel">
     <p>Are You sure you want to clear this debt? </p>
 </Modal>
@@ -210,7 +236,8 @@ OnCancel="HandleCancel">
     private bool isDeleteModalVisible = false;
     private bool isClearDebtModalVisible = false;
     private DebtStatus? selectedStatus = null;
-
+    private string sortField = string.Empty;
+    private bool sortAscending = true;
     // Modal Methods
 
     // Show Modal
@@ -272,6 +299,8 @@ OnCancel="HandleCancel">
         isDeleteModalVisible = false;
         StateHasChanged();
     }
+
+    // clear debt method
     private async Task ClearDebt()
     {
         if (selectedTransaction == null)
@@ -311,6 +340,28 @@ OnCancel="HandleCancel">
         StateHasChanged();
     }
 
+    // sorting
+
+    // Add sorting toggle method
+    private void ToggleSort(string field)
+    {
+        if (sortField == field)
+        {
+            // If clicking the same field, toggle direction
+            sortAscending = !sortAscending;
+        }
+        else
+        {
+            // If clicking a new field, set it with ascending order
+            sortField = field;
+            sortAscending = true;
+        }
+
+        ApplyFilters();
+    }
+
+
+
     // Filtering Method
 
     // Search by title
@@ -338,14 +389,15 @@ OnCancel="HandleCancel">
         searchTerm = string.Empty;
         selectedTagId = string.Empty;
         selectedDateRange = new DateTime?[2];
-        selectedStatus = null;  
+        sortField = string.Empty;
+        sortAscending = true;
+        selectedStatus = null;
 
-        // Force the RangePicker to reset
         await InvokeAsync(() =>
-        {
-            ApplyFilters();
-            StateHasChanged();
-        });
+    {
+        ApplyFilters();
+        StateHasChanged();
+    });
     }
 
     // Date Range On Change function
@@ -401,6 +453,22 @@ OnCancel="HandleCancel">
             {
                 var endDate = selectedDateRange[1].Value.Date.AddDays(1).AddSeconds(-1);
                 query = query.Where(t => t.transactionDate <= endDate);
+            }
+
+            // Apply sorting
+            switch (sortField)
+            {
+                case "amount":
+                    query = sortAscending
+                    ? query.OrderBy(t => t.amount)
+                    : query.OrderByDescending(t => t.amount);
+                    break;
+                case "date":
+                    query = sortAscending
+                    ? query.OrderBy(t => t.transactionDate)
+                    : query.OrderByDescending(t => t.transactionDate);
+                    break; 
+                
             }
 
             filteredTransactions = query.ToList();

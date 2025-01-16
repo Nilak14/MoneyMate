@@ -8,7 +8,7 @@ namespace MoneyMate.Models
     }
     public enum DebtStatus
     {
-        Pending, Cleared, Rejected
+        Pending, Cleared
     }   
     public enum UserCurrencyType
     {

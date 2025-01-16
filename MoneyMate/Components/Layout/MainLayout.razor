@@ -35,7 +35,7 @@ else
                     <p>Are you sure you want to Log out?</p>
                 </Modal>
             </nav>
-            <article class="content max-w-screen min-h-screen bg-gray-300 px-4 sm:max-w-[calc(100vw-250px)]">
+            <article class="content max-w-screen min-h-screen bg-gray-300 px-4 !pb-10 sm:max-w-[calc(100vw-250px)]">
                 @Body
             </article>
         </main>
@@ -43,9 +43,9 @@ else
 }
 
 @code {
-    private bool isAuthenticated = false; 
+    private bool isAuthenticated = true; 
     private bool logoutModalVisible = false;
-    private UserModel authUser = UserHelper.getSession();
+    private UserModel authUser = UserHelper.GetSession();
     private void ShowLogoutModal()
     {
         logoutModalVisible = true;
@@ -74,7 +74,7 @@ else
     protected override void OnInitialized()
     {
         GlobalState.OnChange += StateHasChanged;
-        authUser = UserHelper.getSession();
+        authUser = UserHelper.GetSession();
 
     }
     // removing subscribe to global state after this comonent get onmounted

@@ -1,0 +1,108 @@
+﻿@page "/setting"
+@using MoneyMate.Models
+@using MoneyMate.Helpers
+@using MoneyMate.Components.ui
+
+<div class="min-h-screen p-6">
+    <div class="mx-auto max-w-7xl space-y-6">
+        <!-- Tags Management Section -->
+        <TagManagement />
+
+        <!-- Password Change Section -->
+        <Card Class="!rounded-lg bg-white p-8 !shadow-lg">
+
+            <form @onsubmit="HandlePasswordChange" class="space-y-6">
+                <div class="border-b border-gray-200 pb-6">
+                    <h3 class="mb-2 text-3xl font-bold text-gray-800">Change Password</h3>
+                    <p class="text-gray-600">Update your account password</p>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(SuccessMessage))
+                {
+                    <p class="text-base font-semibold text-green-400">@SuccessMessage</p>
+                }
+                @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+                {
+                    <p class="text-base font-semibold text-red-500">@ErrorMessage</p>
+                }
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Current Password</label>
+                    <InputPassword required @bind-Value="@CurrentPassword" Placeholder="CurrentPassword" Size="InputSize.Large">
+
+                    </InputPassword>
+
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-gray-700">New Password</label>
+                    <InputPassword required @bind-Value="@NewPassword" Placeholder="NewPassword" Size="InputSize.Large">
+
+                    </InputPassword>
+
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Confirm New Password</label>
+                    <InputPassword required @bind-Value="@ConfirmNewPassword" Placeholder="ConfirmNewPassword" Size="InputSize.Large">
+
+                    </InputPassword>
+
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit"
+                    class="flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-white shadow-md transition-all duration-200 hover:bg-green-700">
+                        Update Password
+                    </button>
+                </div>
+            </form>
+        </Card>
+    </div>
+</div>
+
+@code {
+    private string CurrentPassword = "";
+    private string NewPassword = "";
+    private string ConfirmNewPassword = "";
+    private string ErrorMessage = "";
+    private string SuccessMessage = "";
+
+    private void HandlePasswordChange()
+    {
+        if (CurrentPassword.Length <= 6 || NewPassword.Length <= 6 || ConfirmNewPassword.Length <= 6)
+        {
+            ErrorMessage = "Password must be longer than 6 characters.";
+            SuccessMessage = "";
+            return;
+        }
+
+        if(NewPassword!= ConfirmNewPassword)
+        {
+            SuccessMessage = "";
+            ErrorMessage = "New and Confirm Password Must match";
+            return;
+        }
+
+        var passwordChangeSuccess = UserHelper.ChangePassword(CurrentPassword, NewPassword);
+
+        if (passwordChangeSuccess)
+        {
+            SuccessMessage = "Password Changed Sucessfully";
+            ErrorMessage = "";
+            ResetForm();
+        }
+        else
+        {
+            ErrorMessage = "Current Password Donot match";
+            SuccessMessage = "";
+        }
+
+
+    }
+    private void ResetForm()
+    {
+        CurrentPassword = "";
+        NewPassword = "";
+        ConfirmNewPassword = "";
+        StateHasChanged();
+    }
+}

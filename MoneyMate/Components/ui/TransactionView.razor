@@ -1,0 +1,74 @@
+﻿@using MoneyMate.Models
+@using MoneyMate.Helpers
+
+<div class="space-y-6 p-4">
+    <!-- Header Section -->
+    <div class="mb-6 text-center">
+        <h2 class="text-2xl font-bold text-green-800">@transaction.transactionType Details</h2>
+        <div class="mt-2 text-3xl font-semibold text-green-700">@transaction.title</div>
+    </div>
+
+    <!-- Amount Section -->
+    <div class="rounded-lg bg-green-50 p-4">
+        <div class="text-center">
+            <div class="text-sm font-medium uppercase text-green-600">Total Amount</div>
+            <div class="mt-1 text-2xl font-bold text-green-800">
+                <FormatNumber amount="@transaction.amount" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="grid-cols-2 grid gap-4 rounded-lg bg-white p-4 shadow-sm">
+        <!-- Date -->
+        <div class="space-y-1">
+            <div class="text-sm font-medium text-gray-500">Date</div>
+            <div class="font-semibold text-gray-800">
+                @transaction.transactionDate?.ToShortDateString()
+            </div>
+        </div>
+
+        <!-- Tag -->
+        @if (tag != null)
+        {
+            <div class="space-y-1">
+                <div class="text-sm font-medium text-gray-500">Tag</div>
+                <Tooltip Title="@tag.tagDescription">
+                    <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+                        @tag.tagName
+                    </span>
+                </Tooltip>
+            </div>
+        }
+    </div>
+
+    <!-- Note Section -->
+    @if (!string.IsNullOrEmpty(transaction.note))
+    {
+        <div class="rounded-lg bg-gray-50 p-4">
+            <div class="text-sm font-medium text-gray-500">Note</div>
+            <div class="mt-1 text-gray-800">@transaction.note</div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public TransactionModel transaction { get; set; }
+    private TagsModel tag;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tag = await TagsHelper.GetTagById(transaction.transactionTagId!);
+    }
+
+    private string GetStatusClass()
+    {
+        return transaction.debtStatus switch
+        {
+            DebtStatus.Pending => "bg-yellow-100 text-yellow-800",
+            DebtStatus.Cleared => "bg-green-100 text-green-800",
+            _ => "bg-gray-100 text-gray-800"
+        };
+    }
+}

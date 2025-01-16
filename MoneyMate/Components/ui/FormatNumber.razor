@@ -11,10 +11,10 @@
 
     private string currencyIcon = string.Empty;
 
-    private UserModel authUser = UserHelper.getSession();
+    private UserModel authUser = UserHelper.GetSession();
     protected override void OnInitialized()
     {
-        authUser = UserHelper.getSession();
+        authUser = UserHelper.GetSession();
         if (authUser.currencyType == UserCurrencyType.Dollor)
         {
             currencyIcon = "$";

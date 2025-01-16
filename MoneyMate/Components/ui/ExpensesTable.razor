@@ -4,19 +4,37 @@
 @using System.Text.Json
 @inject GlobalState GlobalState
 
-<p>Total Expenses: <FormatNumber amount=@totalExpenses /></p>
-<p>Total Balance: <FormatNumber amount=@totalBalance /></p>
+<div class="mb-10 flex flex-wrap justify-between gap-10 sm:flex-col sm:items-stretch md:flex-row md:gap-10">
 
-<div class="mb-4 flex w-full items-center justify-between gap-20">
-    <!-- Search Input -->
-    <div class="w-[50vw]">
-        <Input Placeholder="Search By Title" AllowClear="true" OnChange="onChange" TValue="string" />
+    <!-- Total Expenses Card Display -->
+    <div class="flex-1 sm:w-full">
+        <AmountCard content="Total Expenses" total="@totalExpenses" />
     </div>
 
-    <!-- Sort and Filter -->
-    <div class="flex gap-5">
-        <!-- Sort By Tag -->
-        <Select OnSelectedItemChanged="FilterByTag" Placeholder="Sort By Tags" TItem="string" TItemValue="string" @bind-Value="selectedTagId">
+    <!-- Total Balance Card Display -->
+    <div class="flex-1 sm:w-full">
+        <AmountCard content="Total Balance" total="@totalBalance" />
+    </div>
+</div>
+
+<div class="mb-6 flex flex-col gap-4 rounded-lg bg-gray-100 p-4 shadow-lg">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <!-- Filter By Title Input -->
+        <div class="w-full sm:w-[50vw]">
+            <Input Placeholder="Search By Title"
+                   AllowClear="false"
+                   @bind-Value="searchTerm"
+                   OnInput="HandleSearch"
+                   TValue="string" />
+        </div>
+
+        <!-- Filter By Tag Select Input-->
+        <Select OnSelectedItemChanged="ApplyFilters"
+                Class="!w-[200px] !max-w-[200px]"
+                Placeholder="Sort By Tags"
+                TItem="string"
+                TItemValue="string"
+                @bind-Value="selectedTagId">
             <SelectOptions>
                 @foreach (var tag in allTags)
                 {
@@ -24,19 +42,57 @@
                 }
             </SelectOptions>
         </Select>
+    </div>
 
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <!-- Date Range Picker -->
+        <RangePicker TValue="DateTime?[]"
+                     Picker="DatePickerType.Date"
+                     Value="selectedDateRange"
+                     OnChange="OnDateRangeChange" />
 
+        <!-- Clear Filters Button -->
+        <button class="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600" @onclick="ClearFilters">Clear Filters</button>
     </div>
 </div>
+
+<!-- Data Display Table-->
 
 <div class="overflow-x-auto">
     <table class="min-w-full table-auto rounded-lg text-white">
         <thead class="bg-green-700">
             <tr>
-                <th class="cursor-pointer px-4 py-2">Title</th>
-                <th class="cursor-pointer px-4 py-2">Amount</th>
-                <th class="cursor-pointer px-4 py-2">Date</th>
+                <th class="px-4 py-2">Title</th>
+                <th class="cursor-pointer px-4 py-2" @onclick='() => ToggleSort("amount")'>
+                    <div class="flex items-center justify-center gap-2">
+                        Amount
+                        @if (sortField == "amount")
+                        {
+                            <Icon Type="@(sortAscending ? "arrow-up" : "arrow-down")"
+                                  Class="text-white" />
+                        }
+                        else
+                        {
+                            <Icon Type="swap" Class="text-white opacity-50" />
+                        }
+                    </div>
+                </th>
+                <th class="cursor-pointer px-4 py-2" @onclick='() => ToggleSort("date")'>
+                    <div class="flex items-center justify-center gap-2">
+                        Date
+                        @if (sortField == "date")
+                        {
+                            <Icon Type="@(sortAscending ? "arrow-up" : "arrow-down")"
+                                  Class="text-white" />
+                        }
+                        else
+                        {
+                            <Icon Type="swap" Class="text-white opacity-50" />
+                        }
+                    </div>
+                </th>
                 <th class="px-4 py-2">Tag</th>
+                <th class="px-4 py-2">Actions</th>
             </tr>
         </thead>
         <tbody class="bg-green-400 text-center font-semibold text-black">
@@ -50,9 +106,38 @@
                         <td class="px-4 py-2">@transaction.amount</td>
                         <td class="px-4 py-2">@transaction.transactionDate?.ToShortDateString()</td>
                         <td class="flex items-center justify-center px-4 py-2 text-center">
-                            <p class="w-fit rounded-xl bg-green-700 px-4 py-2 text-center text-white">
-                                @tag?.tagName
-                            </p>
+                            @if (!string.IsNullOrWhiteSpace(@tag?.tagName))
+                            {
+                                <p class="w-fit rounded-xl bg-green-700 px-4 py-2 text-center text-white">
+                                    @tag?.tagName
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="w-fit rounded-xl bg-green-700 px-4 py-2 text-center text-white">
+                                    N/A
+                                </p>
+                            }
+                        </td>
+                        <td class="relative px-4 py-2">
+                            <Dropdown Trigger="new[] { Trigger.Click }">
+                                <Overlay>
+                                    <Menu>
+                                        <MenuItem OnClick="() => HandleView(transaction)">
+                                            <Icon Type="eye" Class="mr-2" /> View
+                                        </MenuItem>
+                                      
+                                        <MenuItem OnClick="() => HandleDelete(transaction)">
+                                            <Icon Type="delete" Class="mr-2" /> Delete
+                                        </MenuItem>
+                                    </Menu>
+                                </Overlay>
+                                <ChildContent>
+                                    <Button Type="@ButtonType.Link">
+                                        <Icon Type="more" Theme="Outline" Class="text-xl" />
+                                    </Button>
+                                </ChildContent>
+                            </Dropdown>
                         </td>
                     </tr>
                 }
@@ -60,15 +145,40 @@
             else
             {
                 <tr>
-                    <td colspan="4" class="px-4 py-2 text-center">No transactions found.</td>
+                    <td colspan="5" class="px-4 py-2 text-center">
+                        <Empty>
+                            <DescriptionTemplate>
+                                <span>No Expenses Transaction Found</span>
+                            </DescriptionTemplate>
+                        </Empty>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
 
+<!-- View Transaction Modal -->
+
+<Modal Centered="true"
+       Title="View Expenses"
+       @bind-Visible="isViewModalVisible"
+       OnCancel="HandleCancel"
+       Footer="@ModalFooter.DefaultCancelFooter">
+    <TransactionView transaction="selectedTransaction" />
+</Modal>
+
+<!-- Delete Transaction Modal -->
+<Modal Title="Delete Transaction" OkText="@("Delete")"
+       Centered="true"
+       @bind-Visible="isDeleteModalVisible"
+       OnOk="Delete"
+       OnCancel="HandleCancel">
+    <p>Are You sure you want to delet this transaction? </p>
+</Modal>
 
 @code {
+    
     private List<TransactionModel> allTransaction;
     private List<TagsModel> allTags = new List<TagsModel>();
     private List<TransactionModel> filteredTransactions;
@@ -77,6 +187,60 @@
     private string searchTerm = string.Empty;
     private string selectedTagId = string.Empty;
     private DateTime?[] selectedDateRange = new DateTime?[2];
+    private TransactionModel selectedTransaction = null;
+    private bool isDeleteModalVisible = false;
+    private bool isViewModalVisible = false;
+    private System.Timers.Timer searchTimer;
+    private string sortField = string.Empty;
+    private bool sortAscending = true;
+
+    // Modal Methods
+
+    // Show Modal
+    private void ShowViewModal()
+    {
+        isViewModalVisible = true;
+    }
+
+    // Delete Modal
+    private void ShowDeleteModal()
+    {
+        isDeleteModalVisible = true;
+    }
+
+    // Close Modal
+    private void HandleCancel()
+    {
+        isViewModalVisible = false;
+        isDeleteModalVisible = false;
+    }
+
+
+    // Handle View Button Click Method
+    private void HandleView(TransactionModel transaction)
+    {
+        selectedTransaction = transaction;
+
+        ShowViewModal();
+    }
+
+    // Handle Delete Button Click Method
+    private void HandleDelete(TransactionModel transaction)
+    {
+        selectedTransaction = transaction;
+        ShowDeleteModal();
+    }
+
+    // Delete Transaction Method
+    private async Task Delete()
+    {
+        await TransactionHelper.DeleteTransaction(selectedTransaction.transactionId);
+        RefreshTransactions();
+
+        StateHasChanged();
+    }
+
+    // Initialized method
 
     protected override async Task OnInitializedAsync()
     {
@@ -88,40 +252,157 @@
         allTags = await TagsHelper.InitializeOrGetTags();
         totalBalance = GetAllAmount.GetTotalBalance();
 
+        searchTimer = new System.Timers.Timer(300);
+        searchTimer.Elapsed += async (sender, e) => await SearchTimerElapsed();
+        searchTimer.AutoReset = false;
     }
+
+    // Change the state of the table after transaction is added or changed
     public void RefreshTransactions()
     {
         allTransaction = TransactionHelper.GetAllTransactions();
         allTransaction = allTransaction.Where(t => t.transactionType == TransactionType.Expense).ToList();
-        filteredTransactions = allTransaction;
         filteredTransactions = allTransaction;
         totalExpenses = allTransaction.Sum(t => t.amount);
         GlobalState.setGlobalTotalExpenses(totalExpenses);
         totalBalance = GetAllAmount.GetTotalBalance();
         StateHasChanged();
     }
-    private void onChange(string value)
-    {
-        searchTerm = value;
-        ApplyFilters();
+    
+    // sorting
 
+    // Add sorting toggle method
+    private void ToggleSort(string field)
+    {
+        if (sortField == field)
+        {
+            // If clicking the same field, toggle direction
+            sortAscending = !sortAscending;
+        }
+        else
+        {
+            // If clicking a new field, set it with ascending order
+            sortField = field;
+            sortAscending = true;
+        }
+
+        ApplyFilters();
     }
 
-    private void FilterByTag()
+    // Filtering Method
+    
+    // Search by title
+    private async Task HandleSearch(ChangeEventArgs e)
     {
-        ApplyFilters();
-
-
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+        searchTimer.Stop();
+        searchTimer.Start();
     }
 
+    // debounce
+    private async Task SearchTimerElapsed()
+    {
+        await InvokeAsync(() =>
+        {
+            ApplyFilters();
+            StateHasChanged();
+        });
+    }
+
+
+    // clearing filtering
+    private async Task ClearFilters()
+    {
+        searchTerm = string.Empty;
+        selectedTagId = string.Empty;
+        selectedDateRange = new DateTime?[2];
+        sortField = string.Empty; 
+        sortAscending = true;    
+
+        await InvokeAsync(() =>
+        {
+            ApplyFilters();
+            StateHasChanged();
+        });
+    }
+
+    // Date Range On Change function
+    private async Task OnDateRangeChange(DateRangeChangedEventArgs<DateTime?[]> args)
+    {
+        if (args.Dates != null && args.Dates.Length == 2)
+        {
+            selectedDateRange = new DateTime?[] { args.Dates[0], args.Dates[1]?.Date.AddDays(1).AddSeconds(-1) };
+            await InvokeAsync(() =>
+            {
+                ApplyFilters();
+                StateHasChanged();
+            });
+        }
+    }
+
+  
+
+    // Apply FIlter Methods
     private void ApplyFilters()
     {
-        filteredTransactions = allTransaction
-            .Where(t => t.transactionType == TransactionType.Expense &&
-                        (string.IsNullOrEmpty(searchTerm) || t.title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) &&
-                        (string.IsNullOrEmpty(selectedTagId) || t.transactionTagId == selectedTagId)).ToList();
+        try
+        {
+            var query = allTransaction.AsQueryable();
+
+            // Existing filters
+            query = query.Where(t => t.transactionType == TransactionType.Expense);
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(t => t.title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true);
+            }
+
+            if (!string.IsNullOrEmpty(selectedTagId))
+            {
+                query = query.Where(t => t.transactionTagId == selectedTagId);
+            }
+
+            if (selectedDateRange[0].HasValue)
+            {
+                var startDate = selectedDateRange[0].Value.Date;
+                query = query.Where(t => t.transactionDate >= startDate);
+            }
+
+            if (selectedDateRange[1].HasValue)
+            {
+                var endDate = selectedDateRange[1].Value.Date.AddDays(1).AddSeconds(-1);
+                query = query.Where(t => t.transactionDate <= endDate);
+            }
+
+            // Apply sorting
+            switch (sortField)
+            {
+                case "amount":
+                    query = sortAscending
+                        ? query.OrderBy(t => t.amount)
+                        : query.OrderByDescending(t => t.amount);
+                    break;
+                case "date":
+                    query = sortAscending
+                        ? query.OrderBy(t => t.transactionDate)
+                        : query.OrderByDescending(t => t.transactionDate);
+                    break;
+            }
+
+            filteredTransactions = query.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error applying filters: {ex.Message}");
+            filteredTransactions = new List<TransactionModel>();
+        }
+    
+}
+
+
+    
+    public void Dispose()
+    {
+        searchTimer?.Dispose();
     }
-
-
-
 }
